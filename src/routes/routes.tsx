@@ -21,6 +21,7 @@ import { ReactNode } from 'react';
 import Relatorio from '../pages/Relatorio';
 import CadastrarBolsista from '../pages/CadastrarBolsista';
 import CadastrarConvenio from '../pages/CadastrarConvenio';
+import CadastrarMateriais from '../pages/CadastrarMateriais';
 import EstatisticasBolsistas from '../pages/Teste';
 import Historico from '../pages/Historico';
 
@@ -149,6 +150,24 @@ export default function AppRoutes() {
             element={
               <PrivateRoutes tiposAllowed={[1, 2]}>
                 <CadastrarConvenio />
+              </PrivateRoutes>
+            }
+          />
+
+          <Route
+            path="/adm/materiais/cadastrar"
+            element={
+              <PrivateRoutes tiposAllowed={[1, 2]}>
+                <CadastrarMateriais />
+              </PrivateRoutes>
+            }
+          />
+
+          <Route
+            path="/adm/materiais/editar/:id"
+            element={
+              <PrivateRoutes tiposAllowed={[1, 2]}>
+                <CadastrarMateriais />
               </PrivateRoutes>
             }
           />

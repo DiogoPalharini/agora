@@ -103,7 +103,7 @@ const Relatorio = () => {
                             <img src={IconeConvenio} />
                             <p>Cadastrar Convênio</p>
                         </div>
-                        <div className="rela_cadastro_botao">
+                        <div className="rela_cadastro_botao"  onClick={() => navigate('/adm/materiais/cadastrar')} >
                             <img src={IconeMaterial} />
                             <p>Cadastrar Material</p>
                         </div>
