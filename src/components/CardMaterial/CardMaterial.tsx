@@ -41,7 +41,7 @@ const CardMaterial: React.FC<CardMaterialProps> = ({
             </div>
             <div className="cama_baixo">
                 <p><span>Projeto Associado:</span> {projetoAssociado}</p>
-                <p><span>Quantidade Comprada:</span> {quantidadeUsada} <span className="cama_peca">∙ R${valorUnitario.toFixed(0)}/peça</span></p>
+                <p><span>QTD. Comprada:</span> {quantidadeUsada} <span className="cama_peca">∙ R${valorUnitario.toFixed(2)}/peça</span></p>
                 <p><span>Fornecedor:</span> {fornecedor}</p>
                 <p className="cama_descricao"><span>Descrição:</span> {descricao}</p>
             </div> 
