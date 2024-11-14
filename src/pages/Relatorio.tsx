@@ -12,6 +12,7 @@ import CardBolsista from "../components/CardBolsista/CardBolsista";
 import axios from "axios";
 import { AuthContext } from "../hook/ContextAuth";
 import CardConvenio from "../components/CardConvenio/CardConvenio";
+import CardMaterial from "../components/CardMaterial/CardMaterial";
 
 interface Bolsista {
     id: number;
@@ -163,6 +164,50 @@ const Relatorio = () => {
                 )}
                 </div>
 
+                <div className="rela_secao">
+                    <h2 className="rela_secao_titulo">Materiais Cadastrados</h2>
+                    <div className="rela_materiais_cards">
+                        <CardMaterial
+                            id={1}
+                            nome="Composto de Silício Auto Curativo"
+                            projetoAssociado="012/24"
+                            quantidadeUsada={52}
+                            valor={500}
+                            fornecedor="Empresa Chique LTDA"
+                        descricao="Compramos as peças pra fazer coisas com ela"
+                        />
+
+                        <CardMaterial
+                            id={1}
+                            nome="Polímero de Alta Compressão QuantumTex"
+                            projetoAssociado="012/24"
+                            quantidadeUsada={105}
+                            valor={500}
+                            fornecedor="Empresa Chique LTDA"
+                            descricao="Compramos as peças pra fazer coisas com ela e depois sei la vou ter que devolver eu acho ne se eles quiserem de volta eu dou de volta fazer o que"
+                        />
+
+                        <CardMaterial
+                            id={1}
+                            nome="Lâmina de Grafeno Supercondutora"
+                            projetoAssociado="012/24"
+                            quantidadeUsada={9}
+                            valor={500}
+                            fornecedor="Empresa Chique LTDA"
+                        descricao="Compramos as peças pra fazer coisas com ela e dai vamos para o espaço"
+                        />
+
+                        <CardMaterial
+                            id={1}
+                            nome="Malha de Plasma Refletivo"
+                            projetoAssociado="012/24"
+                            quantidadeUsada={50}
+                            valor={500}
+                            fornecedor="Empresa Chique LTDA"
+                        descricao="Compramos as peças pra fazer coisas com ela"
+                        />
+                    </div>
+                </div>
                     </div>
                 </div>
         </>

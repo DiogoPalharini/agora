@@ -90,3 +90,8 @@
     gap: 2.5%;
 }
 
+.rela_materiais_cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5%;
+}

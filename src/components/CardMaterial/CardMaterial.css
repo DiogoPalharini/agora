@@ -1,0 +1,93 @@
+.cama_container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #F5F5F5;
+    padding: 32px;
+    border-radius: 16px;
+    width: 30.83%;
+    color: #303030;
+    margin-bottom: 2.5%;
+}
+
+.cama_container span {
+    font-weight: 500;
+    padding-bottom: 16px;
+}
+
+.cama_cima {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #C4C4C4;
+}
+
+.cama_cima h2 {
+    font-size: 20px;
+    font-weight: 500;
+    text-align: start;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cama_cima img {
+    background-color: #003383;
+    padding: 12px;
+    border-radius: 48px;
+    width: 64px;
+    height: 64px;
+}
+
+.cama_cima_info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cama_baixo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.cama_peca {
+    font-weight: 400 !important;
+    color: #808080;
+}
+
+.cama_baixo p {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #C4C4C4;
+}
+
+.cama_baixo p:nth-last-child(1) {
+    padding-bottom: 0px;
+    border-bottom: none;
+}
+
+.cama_descricao {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.caco_botoes.cama {
+    margin-top: 32px;
+}
+
+.caco_botoes.botao.metade {
+    width: 50%;
+}
+
+.caco_botoes.botao.metade img {
+    max-height: 32px;
+}
