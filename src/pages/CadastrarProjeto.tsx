@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent, useContext } from 'react';
+import { useState, ChangeEvent, FormEvent, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/CadastrarProjeto.css';
@@ -7,12 +7,14 @@ import { erroror, Toast } from "../components/Swal/Swal";
 import { AuthContext } from '../hook/ContextAuth';
 import BotaoCTA from '../components/BotaoCTA/BotaoCTA';
 import criarProjeto from '../img/criar_projeto.svg';
+import IconeInfo from "../img/info_azul.svg"
 
 const CadastrarProjeto = () => {
   const navigate = useNavigate();
   const { adm } = useContext(AuthContext);
   const [project, setProject] = useState({
     referencia: '',
+    nome: '',
     empresa: '',
     objeto: '',
     descricao: '',
@@ -28,6 +30,8 @@ const CadastrarProjeto = () => {
     adm: adm?.id
   });
 
+  const [sugestaoReferencia, setSugestaoReferencia] = useState('');
+
   const [fileName, setFileName] = useState({
     propostas: 'Nenhum arquivo foi subido ainda.',
     contratos: 'Nenhum arquivo foi subido ainda.',
@@ -36,6 +40,7 @@ const CadastrarProjeto = () => {
 
   const [errors, setErrors] = useState({
     referencia: false,
+    nome: false,
     empresa: false,
     coordenador: false,
     valor: false,
@@ -44,6 +49,25 @@ const CadastrarProjeto = () => {
     objeto: false,
     descricao: false,
   });
+
+  useEffect(() => {
+    const fetchProximaReferencia = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/projeto/proxima-referencia', {
+          headers: {
+            Authorization: `Bearer ${adm?.token}`, // Substitua pelo método de autenticação que você usa
+          },
+        });
+        setSugestaoReferencia(response.data); // Armazena a sugestão na variável de estado
+        setProject((prev) => ({ ...prev, referencia: response.data })); // Preenche o campo de referência
+      } catch (error) {
+        console.error('Erro ao obter a próxima referência:', error);
+      }
+    };
+  
+    fetchProximaReferencia();
+  }, []);
+  
 
   const formatCurrency = (value: string) => {
     const numericValue = value.replace(/\D/g, '');
@@ -72,9 +96,30 @@ const CadastrarProjeto = () => {
     setFileName((prev) => ({ ...prev, [name]: file ? file.name : 'Nenhum arquivo foi subido ainda.' }));
   };
 
+  const anoAtual = new Date().getFullYear() % 100;
+
+    const handleReferenciaChange = (e: any) => {
+    const input = e.target.value.replace(/\D/g, ''); // Remove qualquer caractere não numérico
+    const referenciaAtual = project.referencia.split('/')[0]; // Extrai a parte `XXX` atual
+  
+    let novaReferencia;
+  
+    if (input.length > referenciaAtual.length) {
+      // Caso o usuário esteja digitando mais números
+      novaReferencia = (referenciaAtual + input.slice(-1)).slice(-3); // Adiciona o novo número e mantém os últimos 3
+    } else {
+      // Caso o usuário esteja apagando caracteres
+      novaReferencia = referenciaAtual.slice(0, -1).padStart(3, '0'); // Remove o último número e preenche com zeros à esquerda
+    }
+  
+    setProject((prev) => ({ ...prev, referencia: `${novaReferencia}/${anoAtual}` }));
+  };
+
+
   const validateForm = () => {
     const newErrors = {
       referencia: project.referencia.trim() === '',
+      nome: project.nome.trim() === '',
       empresa: project.empresa.trim() === '',
       coordenador: project.coordenador.trim() === '',
       valor: project.valor.trim() === '' || isNaN(Number(project.valor.replace(/\D/g, ''))) || Number(project.valor.replace(/\D/g, '')) <= 0,
@@ -99,6 +144,7 @@ const CadastrarProjeto = () => {
         const formData = new FormData();
         const projeto = {
           referenciaProjeto: project.referencia,
+          nome: project.nome,
           empresa: project.empresa,
           objeto: project.objeto,
           descricao: project.descricao,
@@ -150,6 +196,7 @@ const CadastrarProjeto = () => {
           dataSolicitacao: new Date().toISOString().split('T')[0],
           informacaoProjeto: JSON.stringify({
             referenciaProjeto: project.referencia,
+            nome: project.nome,
             empresa: project.empresa,
             objeto: project.objeto,
             descricao: project.descricao,
@@ -198,22 +245,53 @@ const CadastrarProjeto = () => {
   return (
     <div className="cadpro_container">
       <Sidebar />
+
       <div className="formulario">
-        <div className="cabecalho">
-          <h1 className="cadpro_titulo">Novo Projeto</h1>
+
+        <div className="infopro_cima">
+          <h1 className="infopro_titulo">Cadastrar Projeto</h1>
+          <div className="infopro_cima_dir">
+            <BotaoCTA img="/src/img/voltar.svg" escrito="Voltar" aparencia="primario" onClick={() => navigate(-1)} />
+          </div>
         </div>
+   
         <form onSubmit={handleSubmit} className="cadpro_form">
-          <div>
-            <label className="cadpro_label">Referência do projeto</label>
+          
+          <div className="cadpro_form_cima">
+            <div className="cadpro_referencia">
+              <div>
+                <label className="cadpro_label">Referência do projeto</label>
+                <div className="cadpro_ref_resultado">
+                <input
+                  type="text"
+                  name="referencia"
+                  value={project.referencia.split('/')[0]}
+                  onChange={handleReferenciaChange}
+                  className={`input-padrao cadpro_correcao referencia ${errors.referencia ? 'input-erro' : ''}`}
+                />
+                <p>{anoAtual}</p>
+                </div>
+              {errors.nome && <span className="erro-texto">Este campo é obrigatório e deve ser um número.</span>}
+              </div>
+              <div className="cadpro_sugestao">
+                <img src={IconeInfo} />
+                <p className="sugestao-texto">Sugestão de próxima referência disponível: <br /> {sugestaoReferencia}</p>
+              </div>
+            </div>
+            
+            <div>
+            <label className="cadpro_label">Nome do projeto</label>
             <input
               type="text"
-              name="referencia"
-              value={project.referencia}
+              name="nome"
+              value={project.nome}
               onChange={handleChange}
-              className={`input-padrao cadpro_correcao ${errors.referencia ? 'input-erro' : ''}`}
+              className={`input-padrao cadpro_correcao ${errors.nome ? 'input-erro' : ''}`}
             />
             {errors.referencia && <span className="erro-texto">Este campo é obrigatório.</span>}
+            </div>
           </div>
+          
 
           <div className="cadpro_secao_dois">
             <div className="cadpro_secao_esq">
