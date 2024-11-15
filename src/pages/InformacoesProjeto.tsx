@@ -19,6 +19,7 @@ interface Arquivo {
 interface Projeto {
     id: number;
     referenciaProjeto: string;
+    nome: string;
     empresa: string;
     objeto: string;
     descricao: string;
@@ -33,7 +34,7 @@ interface Projeto {
 const InformacoesProjeto = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const projeto: Projeto = location.state; // Obtem o projeto da navegação
+    const projeto: Projeto = location.state;
     const [arquivos, setArquivos] = useState<Arquivo[]>([]);
     const { adm } = useContext(AuthContext);
 
@@ -222,8 +223,8 @@ const InformacoesProjeto = () => {
 
                 <div className="infopro_info">
                     <div>
-                        <p className="infopro_info_titulo">Referência do projeto</p>
-                        <p className="infopro_info_texto">{projeto.referenciaProjeto}</p>
+                        <p className="infopro_info_titulo">Referência e Nome do projeto</p>
+                        <p className="infopro_info_texto">{projeto.referenciaProjeto} - {projeto.nome}</p>
                     </div>
 
                     { adm ? (

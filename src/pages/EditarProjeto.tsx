@@ -18,6 +18,7 @@ interface Arquivo {
 interface Projeto {
     id: number;
     referenciaProjeto: string;
+    nome: string;
     empresa: string;
     objeto: string;
     descricao: string;
@@ -44,9 +45,9 @@ const EditarProjeto = () => {
     }>({ propostas: null, contratos: null, artigos: null });
     const [valorFormatado, setValorFormatado] = useState<string>('');
     const [fileName, setFileName] = useState({
-        propostas: 'Nenhum arquivo foi subido ainda.',
-        contratos: 'Nenhum arquivo foi subido ainda.',
-        artigos: 'Nenhum arquivo foi subido ainda.',
+        propostas: 'Não há nenhum arquivo ainda.',
+        contratos: 'Não há nenhum arquivo ainda.',
+        artigos: 'Não há nenhum arquivo ainda.',
     });
     const [arquivosParaExcluir, setArquivosParaExcluir] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -101,70 +102,93 @@ const EditarProjeto = () => {
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
 
-        if (adm?.tipo === 1) {
-            await salvarProjeto();
-        } else {
-            await enviarSolicitacaoEdicao();
-        }
-    };
+      e.preventDefault();
+  
+      const payload = {
+          ...formData,
+          adm: adm?.id,
+      };
+  
+      try {
+          if (adm?.tipo === 1) {
+              await salvarProjeto(payload);
+          } else {
+              await enviarSolicitacaoEdicao(payload);
+          }
+      } catch (error) {
+          console.error('Erro ao processar a submissão:', error);
+      }
+  };
+  
+  const salvarProjeto = async (payload: any) => {
+    try {
+        const data = new FormData();
 
-    const salvarProjeto = async () => {
-        try {
-            const data = new FormData();
-            if (formData) {
-                data.append('projeto', new Blob([JSON.stringify(formData)], { type: 'application/json' }));
-            }
+        // Adiciona o payload diretamente ao FormData
+        data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 
-            Object.entries(arquivosNovos).forEach(([tipo, file]) => {
-                if (file) data.append(tipo, file);
-            });
+        Object.entries(arquivosNovos).forEach(([tipo, file]) => {
+            if (file) data.append(tipo, file);
+        });
 
-            arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
+        arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
 
-            await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
-                headers: { Authorization: `Bearer ${adm?.token}` },
-            });
+        await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
+            headers: { Authorization: `Bearer ${adm?.token}` },
+        });
 
-            Toast.fire({ icon: 'success', title: 'Projeto atualizado com sucesso!' });
-            navigate("/");
-        } catch (error) {
-            console.error('Erro ao atualizar o projeto:', error);
-            Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
-        }
-    };
+        Toast.fire({
+          icon: 'success',
+          title: 'Projeto atualizado com sucesso!',
+          position: 'top',
+          background: '#ffffff',
+          timerProgressBar: true,
+          didOpen: (toast) => {
+              toast.style.marginTop = '32px';
+              const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
+              if (progressBar) {
+                  progressBar.style.backgroundColor = '#28a745'; // Define a cor verde para a barra de progresso
+              }
+          }
+      });   
+        navigate("/");
+    } catch (error) {
+        console.error('Erro ao atualizar o projeto:', error);
+        Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
+    }
+};
 
-    const enviarSolicitacaoEdicao = async () => {
+  
+  const enviarSolicitacaoEdicao = async (payload: any) => {
       try {
           const data = new FormData();
   
-          if (formData) {
-              // Filtrar apenas os campos necessários para `informacaoProjeto`
-              const projetoInfo = {
-                  referenciaProjeto: formData.referenciaProjeto,
-                  empresa: formData.empresa,
-                  objeto: formData.objeto,
-                  descricao: formData.descricao,
-                  coordenador: formData.coordenador,
-                  ocultarValor: formData.ocultarValor,
-                  ocultarEmpresa: formData.ocultarEmpresa,
-                  valor: formData.valor,
-                  dataInicio: formData.dataInicio,
-                  dataTermino: formData.dataTermino,
-                  situacao: formData.situacao,
-              };
+          // Criação do objeto com as informações do projeto para solicitação
+          const projetoInfo = {
+              referencia: payload.referencia,
+              nome: payload.nome,
+              empresa: payload.empresa,
+              objeto: payload.objeto,
+              descricao: payload.descricao,
+              coordenador: payload.coordenador,
+              ocultarValor: payload.ocultarValor,
+              ocultarEmpresa: payload.ocultarEmpresa,
+              valor: payload.valor,
+              dataInicio: payload.dataInicio,
+              dataTermino: payload.dataTermino,
+              situacao: payload.situacao,
+          };
   
-              const solicitacaoPayload = {
-                  adminSolicitanteId: adm?.id,
-                  statusSolicitado: "Pendente",
-                  projetoId: id,
-                  informacaoProjeto: JSON.stringify(projetoInfo),
-                  tipoAcao: "Editar",
-              };
+          const solicitacaoPayload = {
+              adminSolicitanteId: adm?.id,
+              statusSolicitado: "Pendente",
+              projetoId: id,
+              informacaoProjeto: JSON.stringify(projetoInfo),
+              tipoAcao: "Editar",
+          };
   
-              data.append('solicitacao', JSON.stringify(solicitacaoPayload));
-          }
+          data.append('solicitacao', JSON.stringify(solicitacaoPayload));
   
           Object.entries(arquivosNovos).forEach(([tipo, file]) => {
               if (file) data.append(tipo, file);
@@ -182,11 +206,8 @@ const EditarProjeto = () => {
       } catch (error) {
           console.error('Erro ao enviar solicitação de edição:', error);
           Toast.fire({ icon: 'error', title: 'Erro ao enviar solicitação.' });
-      }
-  };
-  
-  
-  
+        }
+    };
 
     if (isLoading) return <div>Carregando...</div>;
     if (!formData) return <div>Erro: Projeto não encontrado.</div>;
@@ -195,19 +216,19 @@ const EditarProjeto = () => {
           <Sidebar />
           <div className="formulario">
             <div className="infopro_cima">
-                    <h1 className="infopro_titulo">Editar Projeto</h1>
-                    <div className="infopro_cima_dir">
-                        <BotaoCTA img="/src/img/voltar.svg" escrito="Voltar" aparencia="primario" onClick={() => navigate(-1)} />
-                    </div>
-                </div>
+              <h1 className="infopro_titulo">Editar Projeto</h1>
+              <div className="infopro_cima_dir">
+                <BotaoCTA img="/src/img/voltar.svg" escrito="Voltar" aparencia="primario" onClick={() => navigate(-1)} />
+              </div>
+            </div>
             <form onSubmit={handleSubmit} className="cadpro_form">
               <div>
-                <label className="cadpro_label">Referência do Projeto</label>
+                <label className="cadpro_label">Nome do Projeto</label>
                 <input
                   type="text"
                   className="input-padrao cadpro_correcao"
-                  name="referenciaProjeto"
-                  value={formData.referenciaProjeto}
+                  name="nome"
+                  value={formData.nome}
                   onChange={handleInputChange}
                 />
               </div>
