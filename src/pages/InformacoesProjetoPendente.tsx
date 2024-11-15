@@ -13,7 +13,8 @@ interface Arquivo {
 }
 
 interface Projeto {
-    referenciaProjeto: string;
+    referencia: string;
+    nome: string;
     empresa: string;
     objeto: string;
     descricao: string;
@@ -28,12 +29,11 @@ interface Projeto {
 const InformacoesProjetoPendente = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const projeto: Projeto = location.state; // Obtem as informações de projeto da navegação
+    const projeto: Projeto = location.state;
     const [arquivos] = useState<Arquivo[]>([]);
     const { adm } = useContext(AuthContext);
 
     useEffect(() => {
-        // Caso o projeto tenha arquivos associados, você pode buscar usando outro endpoint, se necessário
     }, [projeto, adm]);
 
     const downloadArquivo = (arquivoId: number, nomeArquivo: string) => {
@@ -86,8 +86,8 @@ const InformacoesProjetoPendente = () => {
 
                 <div className="infopro_info">
                     <div>
-                        <p className="infopro_info_titulo">Referência do projeto</p>
-                        <p className="infopro_info_texto">{projeto.referenciaProjeto}</p>
+                        <p className="infopro_info_titulo">Nome do projeto</p>
+                        <p className="infopro_info_texto">{projeto.nome}</p>
                     </div>
 
                     <div>
