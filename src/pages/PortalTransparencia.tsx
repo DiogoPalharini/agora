@@ -65,6 +65,7 @@ const PortalTransparencia = () => {
     };
 
     const aplicarFiltro = () => {
+
         const projetosFiltrados = projetos.filter((projeto) => {
 
             const palavraChaveMatch = 
@@ -151,7 +152,7 @@ const PortalTransparencia = () => {
                                 {projetosFiltrados.map((projeto) => (
                                     <div className="portal_projeto_container" key={projeto.id}>
                                         <div className="portal_projeto_esq">
-                                            <p><span>Referência do projeto:</span> {projeto.referenciaProjeto}</p>
+                                            <p><span>Nome:</span> {projeto.referenciaProjeto} - {projeto.nome}</p>
                                             <p><span>Coordenador:</span> {projeto.coordenador}</p>
                                         </div>
                                         <div className="portal_projeto_meio">

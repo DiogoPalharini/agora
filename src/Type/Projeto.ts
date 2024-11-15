@@ -1,6 +1,7 @@
 export interface Projeto {
     id: number;
     referenciaProjeto: string;
+    nome: string;
     empresa: string;
     objeto: string;
     descricao: string;
