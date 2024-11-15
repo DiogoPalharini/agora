@@ -156,12 +156,14 @@ export const Sidebar: React.FC = () => {
               <img src={isAtivoRelatorio ? RelatorioActive : Relatorio} alt="Relatório" />
               <p className={isAbriuSidebar || !isTelaPequena1200 ? "" : "none"}>Relatório</p>
             </div>
-
+            
+            {adm?.tipo === 1 && (
             <div className={`side_botao ${isAtivoHistorico ? "ativo" : ""} ${isTelaPequena1200 && !isAbriuSidebar ? "side_centralizar" : ""}`} 
               onClick={() => navigate('/adm/historico')}>
               <img src={isAtivoHistorico ? HistoricoActive :Historico} alt="Histórico" />
               <p className={isAbriuSidebar || !isTelaPequena1200 ? "" : "none"}>Histórico</p>
             </div>
+            )}
 
           </div>
           </div>
