@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import BotaoCTA from '../components/BotaoCTA/BotaoCTA';
 import IconeLixeira from "../img/lixeira.svg"
 import IconeEditar from "../img/editar_projeto.svg"
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Arquivo {
     id: number;
@@ -87,6 +89,57 @@ const InformacoesProjeto = () => {
         }).replace(/\s/g, '');
     };
 
+    const gerarPDF = async () => {
+        // Selecionar os elementos a serem ocultados e estilizados
+        const infoproTitulo = document.querySelector('.infopro_titulo') as HTMLElement;
+        const infoproCima = document.querySelector('.infopro_cima') as HTMLElement;
+        const infoproCimaDir = document.querySelector('.infopro_cima_dir') as HTMLElement;
+        const arquivosContainer = document.querySelector('.infopro_arquivos') as HTMLElement;
+    
+        // Adicionar classe temporária ao título para aplicar estilos com !important
+        if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
+    
+        // Aplicar estilos temporários
+        if (infoproCima) infoproCima.style.background = 'none';
+    
+        // Ocultar as divs
+        if (infoproCimaDir) infoproCimaDir.style.display = 'none';
+        if (arquivosContainer) arquivosContainer.style.display = 'none';
+    
+        const elemento = document.querySelector('.infopro_container') as HTMLElement;
+        if (!elemento) return;
+    
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const larguraPDF = pdf.internal.pageSize.getWidth() - 10;
+        const alturaPDF = pdf.internal.pageSize.getHeight() - 10;
+    
+        try {
+            // Capturar o elemento como canvas
+            const canvas = await html2canvas(elemento);
+            const imgData = canvas.toDataURL('image/png');
+            const imgAltura = (canvas.height * larguraPDF) / canvas.width;
+            let posY = 0;
+    
+            // Adicionar a imagem ao PDF, lidando com múltiplas páginas
+            while (posY < imgAltura) {
+                pdf.addImage(imgData, 'PNG', 5, 5 - posY, larguraPDF, imgAltura);
+                posY += alturaPDF;
+                if (posY < imgAltura) pdf.addPage();
+            }
+    
+            // Salvar o PDF
+            pdf.save('informacoes_projeto.pdf');
+        } catch (error) {
+            console.error('Erro ao gerar PDF:', error);
+        } finally {
+            // Remover a classe temporária e restaurar a visibilidade dos elementos
+            if (infoproTitulo) infoproTitulo.classList.remove('infopro_pdf_titulo');
+            if (infoproCima) infoproCima.style.background = '';
+            if (infoproCimaDir) infoproCimaDir.style.display = 'flex';
+            if (arquivosContainer) arquivosContainer.style.display = 'block';
+        }
+    };
+    
     const deletarProjeto = () => {
         if (adm?.tipo === 2) {
             // Administrador tipo 2 faz a solicitação de exclusão
@@ -213,6 +266,7 @@ const InformacoesProjeto = () => {
                     <div className="infopro_cima_dir">
                         { adm && (
                             <>
+                                <button onClick={gerarPDF}>Gerar PDF</button>
                                 <BotaoCTA img={IconeLixeira} escrito="Deletar" aparencia="secundario" cor="vermelho" onClick={deletarProjeto} />
                                 <BotaoCTA img={IconeEditar} escrito="Editar" aparencia="secundario" cor="cor_primario"  onClick={editarProjeto} />
                             </>
@@ -281,7 +335,7 @@ const InformacoesProjeto = () => {
                         <p className="infopro_info_texto">{formatarData(projeto.dataTermino)}</p>
                     </div>
 
-                    <div>
+                    <div className='infopro_arquivos'>
                         <p className="infopro_info_titulo cima">Arquivos do projeto</p>
                         {arquivos.length > 0 ? (
                             <div className="infopro_arquivos_container">

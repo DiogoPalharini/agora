@@ -102,6 +102,12 @@
     min-width: 300px;
 }
 
+.infopro_pdf_titulo {
+    text-align: center !important;
+    margin: 0 auto !important;
+}
+
+
 @media only screen and (max-width: 1200px) {
 
     .infopro_cima {
