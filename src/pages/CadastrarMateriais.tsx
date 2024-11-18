@@ -274,7 +274,6 @@ const CadastrarMateriais: React.FC = () => {
                 value={formData.descricao}
                 onChange={handleChange}
                 placeholder="Descrição do material"
-                required
               />
             </div>
           </div>

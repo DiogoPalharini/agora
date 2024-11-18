@@ -13,6 +13,9 @@ const EstatisticasBolsistas: React.FC = () => {
     const [numeroBolsistas, setNumeroBolsistas] = useState<number>(0);
     const [valorTotalBolsa, setValorTotalBolsa] = useState<number>(0);
     const [bolsistasPorArea, setBolsistasPorArea] = useState<{ [key: string]: number }>({});
+    const [valorTotalMateriais, setValorTotalMateriais] = useState<number>(0);
+    const [materiaisPorProjeto, setMateriaisPorProjeto] = useState<{ [key: string]: number }>({});
+    const [quantidadePorFornecedor, setQuantidadePorFornecedor] = useState<{ [key: string]: number }>({});
 
     // Obter o número total de bolsistas
     const fetchNumeroBolsistas = async () => {
@@ -22,15 +25,12 @@ const EstatisticasBolsistas: React.FC = () => {
                     Authorization: `Bearer ${adm?.token}`,
                 },
             });
-            console.log("Resposta da API para número de bolsistas:", response.data);
             setNumeroBolsistas(response.data);
         } catch (error) {
             console.error("Erro ao buscar o número de bolsistas:", error);
         }
     };
-    
 
-    // Obter o valor total pago em bolsas
     // Obter o valor total pago em bolsas
     const fetchValorTotalBolsa = async () => {
         try {
@@ -39,14 +39,12 @@ const EstatisticasBolsistas: React.FC = () => {
                     Authorization: `Bearer ${adm?.token}`,
                 },
             });
-            console.log("Resposta da API para valor total:", response.data);
             const valorTotal = isNaN(parseFloat(response.data)) ? 0 : parseFloat(response.data);
             setValorTotalBolsa(valorTotal);
         } catch (error) {
             console.error("Erro ao buscar o valor total pago em bolsas:", error);
         }
     };
-    
 
     // Obter a quantidade de bolsistas por área de atuação
     const fetchBolsistasPorArea = async () => {
@@ -62,15 +60,64 @@ const EstatisticasBolsistas: React.FC = () => {
         }
     };
 
+    // Obter o valor total pago em materiais
+    const fetchValorTotalMateriais = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/materiais/valor-total", {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                },
+            });
+            const valorTotal = isNaN(parseFloat(response.data.valorTotal)) ? 0 : parseFloat(response.data.valorTotal);
+            setValorTotalMateriais(valorTotal);
+        } catch (error) {
+            console.error("Erro ao buscar o valor total pago em materiais:", error);
+        }
+    };
+
+    // Obter a quantidade de materiais por projeto
+    const fetchMateriaisPorProjeto = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/materiais/materiais-por-projeto", {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                },
+            });
+    
+            // A resposta agora é um mapa simples { "Projeto A": 100, "Projeto B": 200 }
+            console.log("Dados para o gráfico de Materiais por Projeto:", response.data);
+            setMateriaisPorProjeto(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar os materiais por projeto:", error);
+        }
+    };    
+
+    // Obter a quantidade de peças compradas por fornecedor
+    const fetchQuantidadePorFornecedor = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/materiais/quantidade-por-fornecedor", {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                },
+            });
+            setQuantidadePorFornecedor(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar a quantidade por fornecedor:", error);
+        }
+    };
+
     // Carregar as informações ao montar o componente
     useEffect(() => {
         fetchNumeroBolsistas();
         fetchValorTotalBolsa();
         fetchBolsistasPorArea();
+        fetchValorTotalMateriais();
+        fetchMateriaisPorProjeto();
+        fetchQuantidadePorFornecedor();
     }, []);
 
-    // Configuração dos dados para o gráfico
-    const data = {
+    // Configuração dos dados para o gráfico de bolsistas por área
+    const dataBolsistas = {
         labels: Object.keys(bolsistasPorArea),
         datasets: [
             {
@@ -83,30 +130,59 @@ const EstatisticasBolsistas: React.FC = () => {
         ],
     };
 
+    // Configuração dos dados para o gráfico de materiais por projeto
+    const dataMateriaisPorProjeto = {
+        labels: Object.keys(materiaisPorProjeto ?? {}),
+        datasets: [
+            {
+                label: "Quantidade de Materiais por Projeto",
+                data: Object.values(materiaisPorProjeto ?? {}),
+                backgroundColor: "rgba(153, 102, 255, 0.6)",
+                borderColor: "rgba(153, 102, 255, 1)",
+                borderWidth: 1,
+            },
+        ],
+    };    
+
+    // Configuração dos dados para o gráfico de quantidade por fornecedor
+    const dataQuantidadePorFornecedor = {
+        labels: Object.keys(quantidadePorFornecedor),
+        datasets: [
+            {
+                label: "Quantidade de Peças",
+                data: Object.values(quantidadePorFornecedor),
+                backgroundColor: "rgba(255, 159, 64, 0.6)",
+                borderColor: "rgba(255, 159, 64, 1)",
+                borderWidth: 1,
+            },
+        ],
+    };
+
     const options = {
         responsive: true,
         plugins: {
             legend: {
                 position: "top" as const,
             },
-            title: {
-                display: true,
-                text: "Quantidade de Bolsistas por Área de Atuação",
-            },
         },
     };
 
     return (
         <div style={{ padding: "20px" }}>
-            <h1>Estatísticas dos Bolsistas</h1>
+            <h1>Estatísticas</h1>
             <div>
                 <h2>Número Total de Bolsistas: {numeroBolsistas}</h2>
-            </div>
-            <div>
-                <h2>Valor Total Pago em Bolsas: R$ {Number(valorTotalBolsa).toFixed(2)}</h2>
+                <h2>Valor Total Pago em Bolsas: R$ {valorTotalBolsa.toFixed(2)}</h2>
+                <h2>Valor Total Pago em Materiais: R$ {valorTotalMateriais.toFixed(2)}</h2>
             </div>
             <div style={{ width: "80%", margin: "0 auto" }}>
-                <Bar data={data} options={options} />
+                <Bar data={dataBolsistas} options={options} />
+            </div>
+            <div style={{ width: "80%", margin: "20px auto" }}>
+                <Bar data={dataMateriaisPorProjeto} options={options} />
+            </div>
+            <div style={{ width: "80%", margin: "20px auto" }}>
+                <Bar data={dataQuantidadePorFornecedor} options={options} />
             </div>
         </div>
     );
