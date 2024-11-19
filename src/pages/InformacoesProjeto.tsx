@@ -11,6 +11,8 @@ import IconeLixeira from "../img/lixeira.svg"
 import IconeEditar from "../img/editar_projeto.svg"
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import BaixarPDF from "../img/baixar_pdf.svg"
+import BaixarExcel from "../img/baixar_excel.svg"
 
 interface Arquivo {
     id: number;
@@ -95,6 +97,7 @@ const InformacoesProjeto = () => {
         const infoproCima = document.querySelector('.infopro_cima') as HTMLElement;
         const infoproCimaDir = document.querySelector('.infopro_cima_dir') as HTMLElement;
         const arquivosContainer = document.querySelector('.infopro_arquivos') as HTMLElement;
+        const infoproGerar = document.querySelector('.infopro_gerar') as HTMLElement;
     
         // Adicionar classe temporária ao título para aplicar estilos com !important
         if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
@@ -105,6 +108,7 @@ const InformacoesProjeto = () => {
         // Ocultar as divs
         if (infoproCimaDir) infoproCimaDir.style.display = 'none';
         if (arquivosContainer) arquivosContainer.style.display = 'none';
+        if (infoproGerar) infoproGerar.style.display = 'none';
     
         const elemento = document.querySelector('.infopro_container') as HTMLElement;
         if (!elemento) return;
@@ -136,7 +140,8 @@ const InformacoesProjeto = () => {
             if (infoproTitulo) infoproTitulo.classList.remove('infopro_pdf_titulo');
             if (infoproCima) infoproCima.style.background = '';
             if (infoproCimaDir) infoproCimaDir.style.display = 'flex';
-            if (arquivosContainer) arquivosContainer.style.display = 'block';
+            if (arquivosContainer) arquivosContainer.style.display = 'flex';
+            if (infoproGerar) infoproGerar.style.display = 'flex';
         }
     };
     
@@ -266,7 +271,6 @@ const InformacoesProjeto = () => {
                     <div className="infopro_cima_dir">
                         { adm && (
                             <>
-                                <button onClick={gerarPDF}>Gerar PDF</button>
                                 <BotaoCTA img={IconeLixeira} escrito="Deletar" aparencia="secundario" cor="vermelho" onClick={deletarProjeto} />
                                 <BotaoCTA img={IconeEditar} escrito="Editar" aparencia="secundario" cor="cor_primario"  onClick={editarProjeto} />
                             </>
@@ -336,7 +340,7 @@ const InformacoesProjeto = () => {
                     </div>
 
                     <div className='infopro_arquivos'>
-                        <p className="infopro_info_titulo cima">Arquivos do projeto</p>
+                        <p className="infopro_info_titulo">Arquivos do projeto</p>
                         {arquivos.length > 0 ? (
                             <div className="infopro_arquivos_container">
                                 {arquivos.map(arquivo => (
@@ -349,6 +353,10 @@ const InformacoesProjeto = () => {
                         ) : (
                             <p className="infopro_nenhum">Nenhum arquivo disponível.</p>
                         )}
+                    </div>
+                    <div className="infopro_gerar">
+                        <BotaoCTA img={BaixarPDF} escrito="Exportar para PDF" aparencia="primario" onClick={gerarPDF} />
+                        <BotaoCTA img={BaixarExcel} escrito="Exportar para Excel" aparencia="primario" cor="verde" onClick={gerarPDF} />
                     </div>
                 </div>
             </div>
