@@ -4,6 +4,7 @@ import IconeCriacao from "../../img/criacao_historico.svg";
 import IconeEdicao from "../../img/editar_projeto.svg";
 import IconeExclusao from "../../img/lixeira.svg";
 import IconeCalendario from "../../img/calendario.svg";
+import IconeVer from "../../img/olho_ver.svg"
 
 interface AlteracaoProjetoProps {
   nomeAdmin: string;
@@ -57,10 +58,15 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, projetoI
             <p>O administrador {nomeAdmin} {getVerboAcao()} o projeto ID {projetoId}</p>
         </div>
         <div className="cahi_dir">
+          <div>
             <h2>Data da Alteração:</h2>
-            <div className="cahi_dir_data">
+            <div className="cahi_dir_data_dentro">
                 <img src={IconeCalendario} />
                 <p>{DataAlteracao}</p>
+            </div>
+          </div>
+            <div className="cahi_ver">
+              <img src={IconeVer} />
             </div>
         </div>
     </div>
