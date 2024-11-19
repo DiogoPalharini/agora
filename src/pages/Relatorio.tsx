@@ -60,15 +60,19 @@ const Relatorio = () => {
         try {
             const response = await axios.get("http://localhost:8080/bolsistas/listar", {
                 headers: {
-                    Authorization: `Bearer ${adm?.token}`, // Cabeçalho de autorização com o token
+                    Authorization: `Bearer ${adm?.token}`,
                     "Content-Type": "application/json",
                 },
             });
-            setBolsistas(response.data);
+            const bolsistasFormatados = response.data.map((bolsista: Bolsista) => ({
+                ...bolsista,
+                valorBolsa: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(parseFloat(bolsista.valorBolsa))
+            }));
+            setBolsistas(bolsistasFormatados);
         } catch (error) {
             console.error("Erro ao listar bolsistas:", error);
         }
-    };
+    };    
 
     const listarConvenios = async () => {
         try {
