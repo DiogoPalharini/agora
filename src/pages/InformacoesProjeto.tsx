@@ -13,6 +13,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import BaixarPDF from "../img/baixar_pdf.svg"
 import BaixarExcel from "../img/baixar_excel.svg"
+import Logo from "../img/logotipo_FAPG_azul.svg"
 
 interface Arquivo {
     id: number;
@@ -98,9 +99,12 @@ const InformacoesProjeto = () => {
         const infoproCimaDir = document.querySelector('.infopro_cima_dir') as HTMLElement;
         const arquivosContainer = document.querySelector('.infopro_arquivos') as HTMLElement;
         const infoproGerar = document.querySelector('.infopro_gerar') as HTMLElement;
+        const infoLogo = document.querySelector('.infopro_pdf_logo') as HTMLElement
     
         // Adicionar classe temporária ao título para aplicar estilos com !important
         if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
+
+        if (infoLogo) infoLogo.style.display = 'block';
     
         // Aplicar estilos temporários
         if (infoproCima) infoproCima.style.background = 'none';
@@ -142,6 +146,7 @@ const InformacoesProjeto = () => {
             if (infoproCimaDir) infoproCimaDir.style.display = 'flex';
             if (arquivosContainer) arquivosContainer.style.display = 'flex';
             if (infoproGerar) infoproGerar.style.display = 'flex';
+            if (infoLogo) infoLogo.style.display = 'none';
         }
     };
     
@@ -266,6 +271,7 @@ const InformacoesProjeto = () => {
         <>
             <Sidebar />
             <div className={`infopro_container ${adm ? 'menor' : ''}`}>
+            <img className='infopro_pdf_logo' src={Logo} alt="logo" />
                 <div className="infopro_cima">
                     <h1 className="infopro_titulo">Informações do Projeto</h1>
                     <div className="infopro_cima_dir">

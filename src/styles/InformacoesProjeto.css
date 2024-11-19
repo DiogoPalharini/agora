@@ -109,6 +109,14 @@
     margin-bottom: -40px !important;
 }
 
+.infopro_pdf_logo {
+    width: 220px;
+    height: 220px;
+    margin: -50px 0;
+    padding: 0;
+    display: none;
+}
+
 .infopro_gerar {
     display: flex;
     gap: 20px;
