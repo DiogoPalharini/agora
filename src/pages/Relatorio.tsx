@@ -36,6 +36,16 @@ interface Convenio {
     prazo: string;
 }
 
+interface Material {
+    id: number;
+    nome: string;
+    nomeProjeto: string;
+    quantidadeUsada: number;
+    valor: number;
+    fornecedor: string;
+    descricao: string;
+}
+
 const Relatorio = () => {
 
     const navigate = useNavigate();
@@ -43,6 +53,7 @@ const Relatorio = () => {
     const [bolsistas, setBolsistas] = useState<Bolsista[]>([]);
     const [convenios, setConvenios] = useState<Convenio[]>([]);
     const { adm } = useContext(AuthContext); // Acessa o contexto de autenticação para obter o token
+    const [materiais, setMateriais] = useState<Material[]>([]);
 
     // Função para listar bolsistas
     const listarBolsistas = async () => {
@@ -82,9 +93,24 @@ const Relatorio = () => {
         return `${diaFormatado}/${mesFormatado}/${ano}`;
     }
 
+    const listarMateriais = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/api/materiais", {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            setMateriais(response.data);
+        } catch (error) {
+            console.error("Erro ao listar materiais:", error);
+        }
+    };
+
     useEffect(() => {
         listarBolsistas();
         listarConvenios();
+        listarMateriais();
     }, []);
 
     return (
@@ -165,48 +191,25 @@ const Relatorio = () => {
                 </div>
 
                 <div className="rela_secao">
-                    <h2 className="rela_secao_titulo">Materiais Cadastrados</h2>
-                    <div className="rela_materiais_cards">
+                <h2 className="rela_secao_titulo">Materiais Cadastrados</h2>
+                <div className="rela_materiais_cards">
+                    {materiais.length > 0 ? (
+                    materiais.map((material) => (
                         <CardMaterial
-                            id={1}
-                            nome="Composto de Silício Auto Curativo"
-                            projetoAssociado="012/24"
-                            quantidadeUsada={52}
-                            valor={500}
-                            fornecedor="Empresa Chique LTDA"
-                        descricao="Compramos as peças pra fazer coisas com ela"
-                        />
-
-                        <CardMaterial
-                            id={1}
-                            nome="Polímero de Alta Compressão QuantumTex"
-                            projetoAssociado="012/24"
-                            quantidadeUsada={105}
-                            valor={500}
-                            fornecedor="Empresa Chique LTDA"
-                            descricao="Compramos as peças pra fazer coisas com ela e depois sei la vou ter que devolver eu acho ne se eles quiserem de volta eu dou de volta fazer o que"
-                        />
-
-                        <CardMaterial
-                            id={1}
-                            nome="Lâmina de Grafeno Supercondutora"
-                            projetoAssociado="012/24"
-                            quantidadeUsada={9}
-                            valor={500}
-                            fornecedor="Empresa Chique LTDA"
-                        descricao="Compramos as peças pra fazer coisas com ela e dai vamos para o espaço"
-                        />
-
-                        <CardMaterial
-                            id={1}
-                            nome="Malha de Plasma Refletivo"
-                            projetoAssociado="012/24"
-                            quantidadeUsada={50}
-                            valor={500}
-                            fornecedor="Empresa Chique LTDA"
-                        descricao="Compramos as peças pra fazer coisas com ela"
-                        />
-                    </div>
+                        key={material.id}
+                        id={material.id}
+                        nome={material.nome}
+                        projetoAssociado={material.nomeProjeto}
+                        quantidadeUsada={material.quantidadeUsada}
+                        valor={material.valor}
+                        fornecedor={material.fornecedor}
+                        descricao={material.descricao}
+                        />             
+                    ))
+                    ) : (
+                    <p className="rela_nenhum">Não há nenhum material cadastrado.</p>
+                    )}
+                </div>
                 </div>
                     </div>
                 </div>
