@@ -11,7 +11,8 @@ const CadastrarMateriais: React.FC = () => {
   const { getToken, adm } = useAuth();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const isEditMode = Boolean(id); // Define o modo de edição com base no ID da URL
+  
+  const isEditMode = Boolean(id);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -22,47 +23,80 @@ const CadastrarMateriais: React.FC = () => {
     descricao: "",
   });
 
+  const [projetos, setProjetos] = useState<{ id: number; referenciaProjeto: string }[]>([]);
+
   useEffect(() => {
-    const fetchMaterial = async () => {
-      if (isEditMode) {
-        const token = getToken();
-        if (!token || !adm) {
-          alert("Erro de autenticação. Faça login novamente.");
-          return;
+    let isMounted = true; // Controle para evitar atualizações após desmontagem do componente
+  
+    const fetchProjetos = async () => {
+      const token = getToken();
+      if (!token || !adm) {
+        alert("Erro de autenticação. Faça login novamente.");
+        return;
+      }
+  
+      try {
+        const response = await axios.get("http://localhost:8080/projeto/listar", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (isMounted) {
+          setProjetos(response.data); // Atualiza o estado somente se o componente ainda estiver montado
         }
+      } catch (error) {
+        console.error("Erro ao buscar projetos:", error);
+        alert("Erro ao carregar os projetos.");
+      }
+    };
   
-        try {
-          const response = await axios.get(
-            `http://localhost:8080/material/${id}`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+    const fetchMaterial = async () => {
+      if (!isEditMode) return;
   
+      const token = getToken();
+      if (!token || !adm) {
+        alert("Erro de autenticação. Faça login novamente.");
+        return;
+      }
+  
+      try {
+        const response = await axios.get(`http://localhost:8080/material/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (isMounted) {
           const materialData = response.data;
-          setFormData({
+          setFormData((prevData) => ({
+            ...prevData, // Garante que somente dados carregados sejam atualizados
             nome: materialData.nome,
             projetoAssociado: materialData.projetoAssociado.id.toString(),
             quantidadeUsada: materialData.quantidadeUsada,
             valor: materialData.valor,
             fornecedor: materialData.fornecedor,
             descricao: materialData.descricao || "",
-          });
-        } catch (error) {
-          console.error("Erro ao buscar dados do material:", error);
-          alert("Erro ao carregar os dados do material para edição.");
+          }));
         }
+      } catch (error) {
+        console.error("Erro ao buscar dados do material:", error);
+        alert("Erro ao carregar os dados do material para edição.");
       }
     };
   
+    fetchProjetos();
     fetchMaterial();
-  }, []);
+  
+    return () => {
+      isMounted = false; // Define como falso para evitar atualizações após desmontagem
+    };
+  }, [id, isEditMode]);
+  
   
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -169,16 +203,21 @@ const CadastrarMateriais: React.FC = () => {
             </div>
 
             <div className="criad_form_linha_input">
-              <label htmlFor="projetoAssociado">Projeto Associado (ID):</label>
-              <input
-                type="text"
+              <label htmlFor="projetoAssociado">Projeto Associado:</label>
+              <select
                 id="projetoAssociado"
                 name="projetoAssociado"
                 value={formData.projetoAssociado}
                 onChange={handleChange}
-                placeholder="Digite o ID do projeto"
                 required
-              />
+              >
+                <option value="">Selecione um projeto</option>
+                {projetos.map((projeto) => (
+                  <option key={projeto.id} value={projeto.id}>
+                    {projeto.referenciaProjeto}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="criad_form_linha_input">

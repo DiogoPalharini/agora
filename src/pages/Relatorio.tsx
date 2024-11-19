@@ -39,7 +39,7 @@ interface Convenio {
 interface Material {
     id: number;
     nome: string;
-    projetoAssociado: { id: number };
+    nomeProjeto: string;
     quantidadeUsada: number;
     valor: number;
     fornecedor: string;
@@ -153,6 +153,7 @@ const Relatorio = () => {
                     <h2 className="rela_secao_titulo">Bolsistas Cadastrados</h2>
                     {bolsistas.length > 0 ? (
                         bolsistas.map((bolsista) => (
+                            bolsista && bolsista.id ? (
                             <CardBolsista
                                 key={bolsista.id}
                                 id={bolsista.id}
@@ -166,6 +167,7 @@ const Relatorio = () => {
                                 telefone={bolsista.telefone}
                                 cpf={bolsista.cpf}
                             />
+                            ) : null
                         ))
                     ) : (
                         <p className="rela_nenhum">Não há nenhum bolsista cadastrado.</p>
@@ -178,15 +180,17 @@ const Relatorio = () => {
 
                 {convenios.length > 0 ? (
                     convenios.map((convenio) => (
-                <CardConvenio
-                    key={convenio.id}
-                    id={convenio.id}
-                    nome={convenio.nome}
-                    tipoConvenio={convenio.tipoConvenio}
-                    objetivo={convenio.objetivo}
-                    instituicao={convenio.instituicao}
-                    prazo={formatarData(convenio.prazo)}
+                        convenio && convenio.id ? (
+                    <CardConvenio
+                        key={convenio.id}
+                        id={convenio.id}
+                        nome={convenio.nome}
+                        tipoConvenio={convenio.tipoConvenio}
+                        objetivo={convenio.objetivo}
+                        instituicao={convenio.instituicao}
+                        prazo={formatarData(convenio.prazo)}
                 />
+                ) : null
                  ))
                  ) : (
                 <p className="rela_nenhum">Não há nenhum convênio cadastrado.</p>
@@ -198,24 +202,31 @@ const Relatorio = () => {
                     <div className="rela_materiais_cards">
                     {materiais.length > 0 ? (
                         materiais.map((material) => (
+                            material && material.id ? (
                             <CardMaterial
                                 key={material.id}
                                 id={material.id}
                                 nome={material.nome}
-                                projetoAssociado={material.projetoAssociado.id.toString()}
+                                projetoAssociado={material.nomeProjeto?.split(" - ")[0]}
                                 quantidadeUsada={material.quantidadeUsada}
                                 valor={material.valor}
                                 fornecedor={material.fornecedor}
                                 descricao={material.descricao}
                             />
+                            ) : null
                         ))
                     ) : (
                         <p className="rela_nenhum">Não há materiais cadastrados.</p>
                     )}
                     </div>
                 </div>
-                    </div>
+
+                <div className="rela_secao">
+                    
                 </div>
+
+                </div>
+            </div>
         </>
     );
 };

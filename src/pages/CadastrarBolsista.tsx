@@ -27,7 +27,7 @@ const CadastrarBolsista = () => {
         cidade: string;
         cpf: string;
         telefone: string;
-        valorBolsa: string; // Agora como string formatada
+        valorBolsa: string;
         duracaoBolsa: string;
         areaAtuacao: string;
         convenio: string;
@@ -37,7 +37,7 @@ const CadastrarBolsista = () => {
         cidade: "",
         cpf: "",
         telefone: "",
-        valorBolsa: "R$ 0,00", // Inicializado formatado
+        valorBolsa: "R$ 0,00",
         duracaoBolsa: "",
         areaAtuacao: "",
         convenio: "",
@@ -56,7 +56,7 @@ const CadastrarBolsista = () => {
                     });
                     setnovoBolsista({
                         ...response.data,
-                        valorBolsa: formatCurrency(response.data.valorBolsa || "0"), // Formatado
+                        valorBolsa: formatCurrency(String(response.data.valorBolsa || "0")),
                     });
                 } catch (error) {
                     console.error("Erro ao buscar dados do bolsista:", error);
@@ -94,14 +94,16 @@ const CadastrarBolsista = () => {
     }, [adm]);
 
     // Função para formatar valores em moeda
-    const formatCurrency = (value: string) => {
-        const numericValue = value.replace(/\D/g, "");
+    const formatCurrency = (value: string | number) => {
+        const stringValue = typeof value === "number" ? value.toFixed(2) : value;
+        const numericValue = stringValue.replace(/\D/g, "");
         const formatter = new Intl.NumberFormat("pt-BR", {
             style: "currency",
             currency: "BRL",
         });
         return formatter.format(parseFloat(numericValue) / 100);
     };
+    
 
     // Manipula alterações no formulário
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -159,11 +161,18 @@ const CadastrarBolsista = () => {
 
             if (response.status === 200 || response.status === 201) {
                 Toast.fire({
-                    icon: "success",
-                    title: response.data.message || (isEditMode ? "Bolsista editado com sucesso!" : "Bolsista cadastrado com sucesso!"),
-                    position: "top",
-                    background: "#ffffff",
+                    icon: 'success',
+                    title: response.data.message || (isEditMode ? 'Bolsista editado com sucesso!' : 'Bolsista criado com sucesso!'),
+                    position: 'top',
+                    background: '#ffffff',
                     timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.style.marginTop = '32px';
+                        const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
+                        if (progressBar) {
+                            progressBar.style.backgroundColor = '#28a745';
+                        }
+                    }
                 });
                 navigate("/adm/relatorio");
             } else {
