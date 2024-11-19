@@ -8,24 +8,43 @@ import { AuthContext } from "../hook/ContextAuth";
 import { Toast } from "../components/Swal/Swal";
 import axios from "axios";
 
+// Interface para o projeto
+interface Projeto {
+    id: number;
+    referenciaProjeto: string;
+    nome: string;
+}
+
 const CadastrarBolsista = () => {
     const { adm } = useContext(AuthContext);
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const isEditMode = Boolean(id);
+    const [projetos, setProjetos] = useState<Projeto[]>([]);
 
-    const [novoBolsista, setnovoBolsista] = useState({
+    const [novoBolsista, setnovoBolsista] = useState<{
+        nome: string;
+        cidade: string;
+        cpf: string;
+        telefone: string;
+        valorBolsa: string; // Agora como string formatada
+        duracaoBolsa: string;
+        areaAtuacao: string;
+        convenio: string;
+        projeto: string;
+    }>({
         nome: "",
         cidade: "",
         cpf: "",
         telefone: "",
-        valorBolsa: "",
+        valorBolsa: "R$ 0,00", // Inicializado formatado
         duracaoBolsa: "",
         areaAtuacao: "",
         convenio: "",
-        projeto: ""
+        projeto: "",
     });
 
+    // Busca dados do bolsista para edição
     useEffect(() => {
         const fetchBolsistaData = async () => {
             if (isEditMode) {
@@ -35,7 +54,10 @@ const CadastrarBolsista = () => {
                             Authorization: `Bearer ${adm?.token}`,
                         },
                     });
-                    setnovoBolsista(response.data);
+                    setnovoBolsista({
+                        ...response.data,
+                        valorBolsa: formatCurrency(response.data.valorBolsa || "0"), // Formatado
+                    });
                 } catch (error) {
                     console.error("Erro ao buscar dados do bolsista:", error);
                     alert("Erro ao carregar os dados do bolsista para edição.");
@@ -45,31 +67,79 @@ const CadastrarBolsista = () => {
         fetchBolsistaData();
     }, [id, isEditMode, adm]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setnovoBolsista((prev) => ({ ...prev, [name]: value }));
+    // Busca projetos e ordena
+    useEffect(() => {
+        const fetchProjetos = async () => {
+            try {
+                const response = await axios.get("http://localhost:8080/projeto/listar", {
+                    headers: { Authorization: `Bearer ${adm?.token}` },
+                });
+
+                const projetosOrdenados = response.data.sort((a: Projeto, b: Projeto) => {
+                    const [numA, anoA] = a.referenciaProjeto.split("/").map(Number);
+                    const [numB, anoB] = b.referenciaProjeto.split("/").map(Number);
+
+                    if (anoA !== anoB) return anoB - anoA; // Ordem decrescente pelo ano
+                    return numA - numB; // Ordem crescente pelo número
+                });
+
+                setProjetos(projetosOrdenados);
+            } catch (error) {
+                console.error("Erro ao buscar projetos:", error);
+                alert("Erro ao carregar projetos.");
+            }
+        };
+
+        fetchProjetos();
+    }, [adm]);
+
+    // Função para formatar valores em moeda
+    const formatCurrency = (value: string) => {
+        const numericValue = value.replace(/\D/g, "");
+        const formatter = new Intl.NumberFormat("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+        });
+        return formatter.format(parseFloat(numericValue) / 100);
     };
 
+    // Manipula alterações no formulário
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        if (name === "valorBolsa") {
+            setnovoBolsista((prev) => ({
+                ...prev,
+                valorBolsa: formatCurrency(value), // Formatado
+            }));
+        } else {
+            setnovoBolsista((prev) => ({
+                ...prev,
+                [name]: value,
+            }));
+        }
+    };
+
+    // Salva o bolsista
     const salvarBolsista = async (e: FormEvent) => {
         e.preventDefault();
         if (!adm) return;
 
-        if (!novoBolsista.cpf || novoBolsista.cpf.replace(/\D/g, '').length !== 11) {
+        if (!novoBolsista.cpf || novoBolsista.cpf.replace(/\D/g, "").length !== 11) {
             alert("CPF incompleto.");
             return;
         }
 
-        if (!novoBolsista.telefone || novoBolsista.telefone.replace(/\D/g, '').length !== 11) {
+        if (!novoBolsista.telefone || novoBolsista.telefone.replace(/\D/g, "").length !== 11) {
             alert("Telefone incompleto.");
             return;
         }
 
         try {
-
             const bolsistaData = {
                 ...novoBolsista,
-                cpf: novoBolsista.cpf.replace(/\D/g, ''),
-                telefone: novoBolsista.telefone.replace(/\D/g, ''),
+                valorBolsa: parseFloat(novoBolsista.valorBolsa.replace(/\D/g, "")) / 100,
+                cpf: novoBolsista.cpf.replace(/\D/g, ""),
+                telefone: novoBolsista.telefone.replace(/\D/g, ""),
                 projeto: { id: novoBolsista.projeto },
             };
 
@@ -89,27 +159,19 @@ const CadastrarBolsista = () => {
 
             if (response.status === 200 || response.status === 201) {
                 Toast.fire({
-                    icon: 'success',
-                    title: response.data.message || (isEditMode ? 'Bolsista editado com sucesso!' : 'Bolsista cadastrado com sucesso!'),
-                    position: 'top',
-                    background: '#ffffff',
+                    icon: "success",
+                    title: response.data.message || (isEditMode ? "Bolsista editado com sucesso!" : "Bolsista cadastrado com sucesso!"),
+                    position: "top",
+                    background: "#ffffff",
                     timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.style.marginTop = '32px';
-                        const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
-                        if (progressBar) {
-                            progressBar.style.backgroundColor = '#28a745';
-                        }
-                    }
                 });
                 navigate("/adm/relatorio");
             } else {
-                throw new Error(response.data.message || 'Erro inesperado.');
+                throw new Error(response.data.message || "Erro inesperado.");
             }
         } catch (error: any) {
             console.error("Erro ao salvar bolsista:", error);
-            const errorMessage = error.response?.data?.message || "Erro ao salvar bolsista.";
-            alert(errorMessage);
+            alert(error.response?.data?.message || "Erro ao salvar bolsista.");
         }
     };
 
@@ -139,7 +201,6 @@ const CadastrarBolsista = () => {
                                 required
                             />
                         </div>
-
                         <div className="criad_form_linha_input">
                             <label htmlFor="cidade">Cidade:</label>
                             <input
@@ -158,7 +219,7 @@ const CadastrarBolsista = () => {
                         <div className="criad_form_linha_input">
                             <label htmlFor="cpf">CPF:</label>
                             <MaskedInput
-                                mask={[/\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, '-', /\d/, /\d/]}
+                                mask={[/\d/, /\d/, /\d/, ".", /\d/, /\d/, /\d/, ".", /\d/, /\d/, /\d/, "-", /\d/, /\d/]}
                                 id="cpf"
                                 name="cpf"
                                 value={novoBolsista.cpf}
@@ -167,11 +228,10 @@ const CadastrarBolsista = () => {
                                 required
                             />
                         </div>
-
                         <div className="criad_form_linha_input">
                             <label htmlFor="telefone">Telefone:</label>
                             <MaskedInput
-                                mask={['(', /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]}
+                                mask={["(", /\d/, /\d/, ")", " ", /\d/, /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/, /\d/, /\d/]}
                                 id="telefone"
                                 name="telefone"
                                 value={novoBolsista.telefone}
@@ -183,20 +243,19 @@ const CadastrarBolsista = () => {
                     </div>
 
                     <h2 className="criad_subtitulo top">Informações sobre a Bolsa</h2>
-                    <div className="criad_form_linha baixo">
+                    <div className="criad_form_linha">
                         <div className="criad_form_linha_input">
                             <label htmlFor="valorBolsa">Valor da Bolsa:</label>
                             <input
-                                type="number"
+                                type="text"
                                 id="valorBolsa"
                                 name="valorBolsa"
                                 value={novoBolsista.valorBolsa}
                                 onChange={handleChange}
-                                placeholder="Digite aqui..."
+                                placeholder="R$ 0,00"
                                 required
                             />
                         </div>
-
                         <div className="criad_form_linha_input">
                             <label htmlFor="duracaoBolsa">Duração da Bolsa (em meses):</label>
                             <input
@@ -209,7 +268,6 @@ const CadastrarBolsista = () => {
                                 required
                             />
                         </div>
-
                         <div className="criad_form_linha_input">
                             <label htmlFor="areaAtuacao">Área de Atuação:</label>
                             <input
@@ -226,22 +284,22 @@ const CadastrarBolsista = () => {
 
                     <div className="criad_form_linha baixo">
                         <div className="criad_form_linha_input">
-                            <label htmlFor="areaAtuacao">Projeto</label>
+                            <label htmlFor="projeto">Projeto</label>
                             <select
                                 id="projeto"
                                 name="projeto"
                                 value={novoBolsista.projeto}
                                 onChange={handleChange}
-                                required >
+                                required
+                            >
                                 <option value="">Selecione um projeto</option>
-                                <option value="1">Teste 01</option>
-                                <option value="2">Teste 02</option>
-                                <option value="3">Teste 03</option>
-                                {/* Listar projetos existentes aqui depois (apenas o nome), e no value do option 
-                                enviar o ID do projeto que tem aquele nome */}
+                                {projetos.map((projeto) => (
+                                    <option key={projeto.id} value={projeto.id}>
+                                        {`${projeto.referenciaProjeto} - ${projeto.nome}`}
+                                    </option>
+                                ))}
                             </select>
                         </div>
-
                         <div className="criad_form_linha_input">
                             <label htmlFor="convenio">Convênio</label>
                             <select
@@ -249,18 +307,18 @@ const CadastrarBolsista = () => {
                                 name="convenio"
                                 value={novoBolsista.convenio}
                                 onChange={handleChange}
-                                required >
+                                required
+                            >
                                 <option value="">Selecione um Convênio</option>
                                 <option value="teste01">Teste 01</option>
                                 <option value="teste02">Teste 02</option>
                                 <option value="teste03">Teste 03</option>
-                                {/* Listar convênios existentes aqui depois */}
                             </select>
                         </div>
                     </div>
 
                     <div className="criad_botao_cad">
-                        <BotaoCTA escrito={isEditMode ? "Salvar Alterações" : "Cadastrar Bolsista"}  aparencia="primario" type="submit" />
+                        <BotaoCTA escrito={isEditMode ? "Salvar Alterações" : "Cadastrar Bolsista"} aparencia="primario" type="submit" />
                     </div>
                 </form>
             </div>
