@@ -80,6 +80,14 @@
     text-overflow: ellipsis;
 }
 
+.cama_descricao.nenhum {
+    color: #808080;
+}
+
+.cama_descricao.nenhum span {
+    color: #303030;
+}
+
 .caco_botoes.cama {
     margin-top: 32px;
 }

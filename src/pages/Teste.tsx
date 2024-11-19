@@ -63,7 +63,7 @@ const EstatisticasBolsistas: React.FC = () => {
     // Obter o valor total pago em materiais
     const fetchValorTotalMateriais = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/materiais/valor-total", {
+            const response = await axios.get("http://localhost:8080/material/valor-total", {
                 headers: {
                     Authorization: `Bearer ${adm?.token}`,
                 },
@@ -78,7 +78,7 @@ const EstatisticasBolsistas: React.FC = () => {
     // Obter a quantidade de materiais por projeto
     const fetchMateriaisPorProjeto = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/materiais/materiais-por-projeto", {
+            const response = await axios.get("http://localhost:8080/material/materiais-por-projeto", {
                 headers: {
                     Authorization: `Bearer ${adm?.token}`,
                 },
@@ -95,7 +95,7 @@ const EstatisticasBolsistas: React.FC = () => {
     // Obter a quantidade de peças compradas por fornecedor
     const fetchQuantidadePorFornecedor = async () => {
         try {
-            const response = await axios.get("http://localhost:8080/api/materiais/quantidade-por-fornecedor", {
+            const response = await axios.get("http://localhost:8080/material/quantidade-por-fornecedor", {
                 headers: {
                     Authorization: `Bearer ${adm?.token}`,
                 },

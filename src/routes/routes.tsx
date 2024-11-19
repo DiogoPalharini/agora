@@ -155,7 +155,7 @@ export default function AppRoutes() {
           />
 
           <Route
-            path="/adm/materiais/cadastrar"
+            path="/adm/material/cadastrar"
             element={
               <PrivateRoutes tiposAllowed={[1, 2]}>
                 <CadastrarMateriais />
@@ -164,7 +164,7 @@ export default function AppRoutes() {
           />
 
           <Route
-            path="/adm/materiais/editar/:id"
+            path="/adm/material/editar/:id"
             element={
               <PrivateRoutes tiposAllowed={[1, 2]}>
                 <CadastrarMateriais />
