@@ -180,9 +180,22 @@ const CadastrarMateriais: React.FC = () => {
                 required
               />
             </div>
+
+            <div className="criad_form_linha_input">
+              <label htmlFor="fornecedor">Fornecedor:</label>
+              <input
+                type="text"
+                id="fornecedor"
+                name="fornecedor"
+                value={formData.fornecedor}
+                onChange={handleChange}
+                placeholder="Fornecedor do material"
+                required
+              />
+            </div>
           </div>
 
-          <div className="criad_form_linha">
+          <div className="criad_form_linha baixo">
             <div className="criad_form_linha_input">
               <label htmlFor="quantidadeUsada">Quantidade Usada:</label>
               <input
@@ -210,23 +223,11 @@ const CadastrarMateriais: React.FC = () => {
             </div>
           </div>
 
-          <div className="criad_form_linha">
-            <div className="criad_form_linha_input">
-              <label htmlFor="fornecedor">Fornecedor:</label>
+          <div className="criad_form_linha baixo">
+            <div className="criad_form_linha_input tudo">
+              <label htmlFor="descricao">Descrição:</label>
               <input
                 type="text"
-                id="fornecedor"
-                name="fornecedor"
-                value={formData.fornecedor}
-                onChange={handleChange}
-                placeholder="Fornecedor do material"
-                required
-              />
-            </div>
-
-            <div className="criad_form_linha_input">
-              <label htmlFor="descricao">Descrição:</label>
-              <textarea
                 id="descricao"
                 name="descricao"
                 value={formData.descricao}

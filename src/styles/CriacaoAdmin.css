@@ -70,3 +70,7 @@
 .criad_subtitulo.top {
     margin-top: 64px;
 }
+
+.criad_form_linha_input.tudo {
+    width: calc(62.7%);
+}
