@@ -13,6 +13,7 @@ import axios from "axios";
 import { AuthContext } from "../hook/ContextAuth";
 import CardConvenio from "../components/CardConvenio/CardConvenio";
 import CardMaterial from "../components/CardMaterial/CardMaterial";
+import CardAnalise from "../components/CardAnalise/CardAnalise";
 
 interface Bolsista {
     id: number;
@@ -216,15 +217,21 @@ const Relatorio = () => {
                             ) : null
                         ))
                     ) : (
-                        <p className="rela_nenhum">Não há materiais cadastrados.</p>
+                        <p className="rela_nenhum">Não há nenhum material cadastrado.</p>
                     )}
                     </div>
                 </div>
 
                 <div className="rela_secao">
-                    
+                <h2 className="rela_secao_titulo">Análises de Projeto Cadastradas</h2>
                 </div>
-
+                <CardAnalise
+                    valorGasto={1500.00}
+                    autor="Pedro da Silva Costa Junior"
+                    informacoesAdicionais="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type..."
+                    resultadoObtido={true}
+                    idProjeto="001/24"
+                 />
                 </div>
             </div>
         </>
