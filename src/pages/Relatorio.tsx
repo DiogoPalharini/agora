@@ -47,6 +47,15 @@ interface Material {
     descricao: string;
 }
 
+interface AnaliseProjeto {
+    id: string;
+    valorGasto: number;
+    autor: string;
+    informacoesAdicionais: string;
+    resultadoObtido: boolean;
+    idProjeto: string;
+}
+
 const Relatorio = () => {
 
     const navigate = useNavigate();
@@ -54,6 +63,7 @@ const Relatorio = () => {
     const [bolsistas, setBolsistas] = useState<Bolsista[]>([]);
     const [convenios, setConvenios] = useState<Convenio[]>([]);
     const [materiais, setMateriais] = useState<Material[]>([]);
+    const [analises, setAnalises] = useState<AnaliseProjeto[]>([]);
     const { adm } = useContext(AuthContext); // Acessa o contexto de autenticação para obter o token
 
     // Função para listar bolsistas
@@ -102,6 +112,21 @@ const Relatorio = () => {
         }
     };
 
+    const listarAnalises = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/analises/listar", {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            console.log("Análises recebidas:", response.data); // Debug
+            setAnalises(response.data);
+        } catch (error) {
+            console.error("Erro ao listar análises:", error);
+        }
+    };
+
     function formatarData(prazo: string): string {
         const [ano, mes, dia] = prazo;
         // Formata o mês e o dia para terem sempre dois dígitos
@@ -115,6 +140,7 @@ const Relatorio = () => {
         listarBolsistas();
         listarConvenios();
         listarMateriais();
+        listarAnalises();
     }, []);
 
     return (
@@ -134,13 +160,13 @@ const Relatorio = () => {
                             <img src={IconeConvenio} />
                             <p>Cadastrar Convênio</p>
                         </div>
-                        <div className="rela_cadastro_botao"  onClick={() => navigate('/adm/material/cadastrar')} >
+                        <div className="rela_cadastro_botao" onClick={() => navigate('/adm/material/cadastrar')} >
                             <img src={IconeMaterial} />
                             <p>Cadastrar Material</p>
                         </div>
-                        <div className="rela_cadastro_botao">
+                        <div className="rela_cadastro_botao" onClick={() => navigate('/adm/analise/cadastrar')}>
                             <img src={IconeAnalise} />
-                            <p>Adicionar Análise</p>
+                            <p>Cadastrar Análise</p>
                         </div>
                     </div>
                 </div>
@@ -225,13 +251,23 @@ const Relatorio = () => {
                 <div className="rela_secao">
                 <h2 className="rela_secao_titulo">Análises de Projeto Cadastradas</h2>
                 </div>
-                <CardAnalise
-                    valorGasto={1500.00}
-                    autor="Pedro da Silva Costa Junior"
-                    informacoesAdicionais="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type..."
-                    resultadoObtido={true}
-                    idProjeto="001/24"
-                 />
+                {analises.length > 0 ? (
+                            analises.map((analise) => (
+                                analise && analise.id ? (
+                                    <CardAnalise
+                                        key={analise.id}
+                                        id={analise.id}
+                                        valorGasto={analise.valorGasto}
+                                        autor={analise.autor}
+                                        informacoesAdicionais={analise.informacoesAdicionais}
+                                        resultadoObtido={analise.resultadoObtido}
+                                        idProjeto={analise.idProjeto}
+                                    />
+                                ) : null
+                            ))
+                        ) : (
+                            <p className="rela_nenhum">Não há nenhuma análise cadastrada.</p>
+                        )}
                 </div>
             </div>
         </>
