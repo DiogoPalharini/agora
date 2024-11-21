@@ -72,5 +72,31 @@
 }
 
 .criad_form_linha_input.tudo {
-    width: calc(62.7%);
+    width: 62.7%;
+}
+
+.cana_textarea {
+    padding: 8px;
+    border: 1px solid #C4C4C4;
+    border-radius: 4px;
+    min-height: 128px;
+}
+
+.criad_form_radio_container {
+    display: flex;
+    gap: 16px;
+}
+
+.criad_form_radio {
+    display: flex;
+    flex-direction: row;
+    background-color: #F5F5F5;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+}
+
+.criad_form_radio input {
+    margin-top: 8px;
+    margin-bottom: 8px;
 }

@@ -24,6 +24,7 @@ import CadastrarConvenio from '../pages/CadastrarConvenio';
 import CadastrarMateriais from '../pages/CadastrarMateriais';
 import EstatisticasBolsistas from '../pages/Teste';
 import Historico from '../pages/Historico';
+import CadastrarAnalise from '../pages/CadastrarAnalise';
 
 
 interface LayoutProps {
@@ -168,6 +169,24 @@ export default function AppRoutes() {
             element={
               <PrivateRoutes tiposAllowed={[1, 2]}>
                 <CadastrarMateriais />
+              </PrivateRoutes>
+            }
+          />
+
+          <Route
+            path="/adm/analise/cadastrar"
+            element={
+              <PrivateRoutes tiposAllowed={[1, 2]}>
+                <CadastrarAnalise />
+              </PrivateRoutes>
+            }
+          />
+
+          <Route
+            path="/adm/analise/editar/:id"
+            element={
+              <PrivateRoutes tiposAllowed={[1, 2]}>
+                <CadastrarAnalise />
               </PrivateRoutes>
             }
           />

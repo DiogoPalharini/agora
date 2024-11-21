@@ -4,23 +4,28 @@ import "./CardAnalise.css";
 import { AuthContext } from '../../hook/ContextAuth';
 import IconeEditar from "../../img/editar.svg";
 import IconeLixeira from "../../img/lixeira_branco.svg";
+import Swal from 'sweetalert2';
+import { Toast } from "../Swal/Swal";
+import { useNavigate } from 'react-router-dom';
 
 interface CardAnaliseProps {
-  valorGasto: number;
-  autor: string;
-  informacoesAdicionais: string;
-  resultadoObtido: boolean;
-  idProjeto: string;
+    id: string;
+    valorGasto: number;
+    autor: string;
+    informacoesAdicionais: string;
+    resultadoObtido: boolean;
+    idProjeto: string;
 }
 
 interface Projeto {
-  id: number;
-  referenciaProjeto: string;
-  valor: number;
-  nome: string;
+    id: number;
+    referenciaProjeto: string;
+    valor: number;
+    nome: string;
 }
 
 const CardAnalise: React.FC<CardAnaliseProps> = ({
+  id,
   valorGasto,
   autor,
   informacoesAdicionais,
@@ -31,6 +36,8 @@ const CardAnalise: React.FC<CardAnaliseProps> = ({
     const [nomeProjeto, setNomeProjeto] = useState<string>("");
     const [valorPrevisto, setValorPrevisto] = useState<number>(0);
     const { adm } = useContext(AuthContext);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProjeto = async () => {
@@ -68,6 +75,59 @@ const CardAnalise: React.FC<CardAnaliseProps> = ({
 
     const { classe, valorFormatado } = getClassAndFormattedDiff(diferenca);
 
+    const excluirAnalise = async () => {
+        const result = await Swal.fire({
+            title: 'Deseja excluir o cadastro dessa Análise?',
+            text: 'Esta ação não pode ser desfeita.',
+            showDenyButton: true,
+            confirmButtonText: 'Sim',
+            denyButtonText: 'Não',
+            width: 620,
+            confirmButtonColor: 'rgb(224, 40, 86)',
+            denyButtonColor: 'rgb(0,114,187)',
+            heightAuto: false,
+            backdrop: true,
+            customClass: {
+                confirmButton: 'confirmButton',
+                denyButton: 'denyButton',
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                // Exclui o Analise
+                await axios.delete(`http://localhost:8080/analises/deletar/${id}?idAdm=${adm?.id}`, {
+                    headers: {
+                        Authorization: `Bearer ${adm?.token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                Toast.fire({
+                    icon: 'success',
+                    title: "Análise excluída com sucesso!",
+                    position: 'top',
+                    background: '#ffffff',
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.style.marginTop = '32px';
+                        const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
+                        if (progressBar) {
+                            progressBar.style.backgroundColor = '#28a745';
+                        }
+                    }
+                });
+
+                navigate('/'); // Redireciona para uma página temporária
+                setTimeout(() => navigate('/adm/relatorio'), 10); // Volta para a página atual após um pequeno delay
+            
+            } catch (error) {
+                console.error("Erro ao excluir Analise:", error);
+                alert("Erro ao excluir Analise.");
+            }
+        }
+    };
+
     return (
         <div className="cana_container">
             <div className="cana_cima">
@@ -77,9 +137,9 @@ const CardAnalise: React.FC<CardAnaliseProps> = ({
                 </div>
                 <div className="cana_cima_dir">
                   <div className="cabo_botoes botao">
-                      <img src={IconeEditar} alt="Ícone Editar" />
+                      <img src={IconeEditar} alt="Ícone Editar" onClick={() => navigate(`/adm/analise/editar/${id}`)}/>
                   </div>
-                  <div className="cabo_botoes botao excluir">
+                  <div className="cabo_botoes botao excluir" onClick={excluirAnalise}>
                       <img src={IconeLixeira} alt="Ícone Lixeira" />
                   </div>
                 </div>
