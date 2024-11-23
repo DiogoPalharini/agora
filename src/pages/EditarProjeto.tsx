@@ -60,6 +60,8 @@ const EditarProjeto = () => {
                     headers: { Authorization: `Bearer ${adm?.token}` },
                 });
                 const projeto = response.data;
+                projeto.dataInicio = formatarDataParaInput(projeto.dataInicio);
+                projeto.dataTermino = formatarDataParaInput(projeto.dataTermino);
                 setFormData(projeto);
                 setValorFormatado(formatarValor(projeto.valor));
             } catch (error) {
@@ -76,6 +78,14 @@ const EditarProjeto = () => {
         const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
         return valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
+
+    const formatarDataParaInput = (dataArray: number[]): string => {
+      if (Array.isArray(dataArray) && dataArray.length === 3) {
+          const [ano, mes, dia] = dataArray;
+          return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+      }
+      return '';
+  };
 
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
