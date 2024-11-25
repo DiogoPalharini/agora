@@ -25,7 +25,7 @@
     font-weight: 500;
     color: #003383;
     text-align: start;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
 }
 
 .rela_cadastro_botao {
@@ -72,7 +72,7 @@
 }
 
 .rela_secao {
-    margin-top: 80px;
+    margin-top: 40px;
 }
 
 .rela_nenhum {
@@ -95,4 +95,34 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2.5%;
+}
+
+.rela_mostrar {
+    display: flex;
+    padding: 32px;
+    background-color: #F5F5F5;
+    border-radius: 16px;
+    margin-top: 32px;
+    gap: 2.5%;
+}
+
+.rela_mostrar_botao {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    width: 23.125%;
+    padding: 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.rela_mostrar_botao.primario {
+    background-color: #003383;
+    color: white;
+}
+
+.rela_mostrar_botao.secundario {
+    border: 2px solid #003383;
+    color: #003383;
 }

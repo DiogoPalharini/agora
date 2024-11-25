@@ -7,6 +7,10 @@ import IconeBolsista from "../img/bolsistas.svg";
 import IconeConvenio from "../img/convenio.svg";
 import IconeMaterial from "../img/material.svg";
 import IconeAnalise from "../img/analise.svg";
+import IconeBolsistaSecundario from "../img/bolsistas_azul.svg";
+import IconeConvenioSecundario from "../img/convenio_azul.svg";
+import IconeMaterialSecundario from "../img/material_azul.svg";
+import IconeAnaliseSecundario from "../img/analise_azul.svg";
 import IconeDownload from "../img/download.svg";
 import CardBolsista from "../components/CardBolsista/CardBolsista";
 import axios from "axios";
@@ -65,6 +69,13 @@ const Relatorio = () => {
     const [materiais, setMateriais] = useState<Material[]>([]);
     const [analises, setAnalises] = useState<AnaliseProjeto[]>([]);
     const { adm } = useContext(AuthContext); // Acessa o contexto de autenticação para obter o token
+
+    const [secaoAtiva, setSecaoAtiva] = useState<string>("bolsistas");
+
+    const ativarSecao = (secao: string) => {
+        setSecaoAtiva(secao);
+    };
+    
 
     // Função para listar bolsistas
     const listarBolsistas = async () => {
@@ -176,99 +187,126 @@ const Relatorio = () => {
                     <BotaoCTA img={IconeDownload} escrito="Baixar Relatório" aparencia="primario" cor="verde" />
                 </div>
 
-                <div className="rela_secao">
-                    <h2 className="rela_secao_titulo">Bolsistas Cadastrados</h2>
-                    {bolsistas.length > 0 ? (
-                        bolsistas.map((bolsista) => (
-                            bolsista && bolsista.id ? (
-                            <CardBolsista
-                                key={bolsista.id}
-                                id={bolsista.id}
-                                nome={bolsista.nome}
-                                areaAtuacao={bolsista.areaAtuacao}
-                                projeto_id={bolsista.projetoId}
-                                convenio={bolsista.convenio}
-                                valorBolsa={bolsista.valorBolsa}
-                                duracaoBolsa={bolsista.duracaoBolsa}
-                                cidade={bolsista.cidade}
-                                telefone={bolsista.telefone}
-                                cpf={bolsista.cpf}
-                            />
-                            ) : null
-                        ))
-                    ) : (
-                        <p className="rela_nenhum">Não há nenhum bolsista cadastrado.</p>
-                    )}
-                </div>
-                
-                <div className="rela_secao">
-                    <h2 className="rela_secao_titulo">Convênios Cadastrados</h2>
-                    <div className="rela_convenios_cards">
-
-                {convenios.length > 0 ? (
-                    convenios.map((convenio) => (
-                        convenio && convenio.id ? (
-                    <CardConvenio
-                        key={convenio.id}
-                        id={convenio.id}
-                        nome={convenio.nome}
-                        tipoConvenio={convenio.tipoConvenio}
-                        objetivo={convenio.objetivo}
-                        instituicao={convenio.instituicao}
-                        prazo={formatarData(convenio.prazo)}
-                />
-                ) : null
-                 ))
-                 ) : (
-                <p className="rela_nenhum">Não há nenhum convênio cadastrado.</p>
-                )}
-                </div>
-
-                <div className="rela_secao">
-                    <h2 className="rela_secao_titulo">Materiais Cadastrados</h2>
-                    <div className="rela_materiais_cards">
-                    {materiais.length > 0 ? (
-                        materiais.map((material) => (
-                            material && material.id ? (
-                            <CardMaterial
-                                key={material.id}
-                                id={material.id}
-                                nome={material.nome}
-                                projetoAssociado={material.nomeProjeto?.split(" - ")[0]}
-                                quantidadeUsada={material.quantidadeUsada}
-                                valor={material.valor}
-                                fornecedor={material.fornecedor}
-                                descricao={material.descricao}
-                            />
-                            ) : null
-                        ))
-                    ) : (
-                        <p className="rela_nenhum">Não há nenhum material cadastrado.</p>
-                    )}
+                <div className="rela_mostrar">
+                    <div className={`rela_mostrar_botao ${secaoAtiva === "bolsistas" ? "primario" : "secundario"}`} onClick={() => ativarSecao("bolsistas")}>
+                        <img src={secaoAtiva === "bolsistas" ? IconeBolsista : IconeBolsistaSecundario} />
+                        <p>Bolsistas</p>
+                    </div>
+                    <div className={`rela_mostrar_botao ${secaoAtiva === "convenios" ? "primario" : "secundario"}`} onClick={() => ativarSecao("convenios")}>
+                        <img src={secaoAtiva === "convenios" ? IconeConvenio : IconeConvenioSecundario} />
+                        <p>Convênios</p>
+                    </div>
+                    <div className={`rela_mostrar_botao ${secaoAtiva === "materiais" ? "primario" : "secundario"}`} onClick={() => ativarSecao("materiais")}>
+                        <img src={secaoAtiva === "materiais" ? IconeMaterial : IconeMaterialSecundario} />
+                        <p>Materiais</p>
+                    </div>
+                    <div className={`rela_mostrar_botao ${secaoAtiva === "analises" ? "primario" : "secundario"}`} onClick={() => ativarSecao("analises")}>
+                        <img src={secaoAtiva === "analises" ? IconeAnalise : IconeAnaliseSecundario} />
+                        <p>Análises</p>
                     </div>
                 </div>
 
-                <div className="rela_secao">
-                <h2 className="rela_secao_titulo">Análises de Projeto Cadastradas</h2>
-                </div>
-                {analises.length > 0 ? (
-                            analises.map((analise) => (
-                                analise && analise.id ? (
-                                    <CardAnalise
-                                        key={analise.id}
-                                        id={analise.id}
-                                        valorGasto={analise.valorGasto}
-                                        autor={analise.autor}
-                                        informacoesAdicionais={analise.informacoesAdicionais}
-                                        resultadoObtido={analise.resultadoObtido}
-                                        idProjeto={analise.idProjeto}
-                                    />
-                                ) : null
-                            ))
-                        ) : (
-                            <p className="rela_nenhum">Não há nenhuma análise cadastrada.</p>
-                        )}
-                </div>
+            {secaoAtiva === "bolsistas" && (
+        <div className="rela_secao">
+        <h2 className="rela_secao_titulo">Bolsistas Cadastrados</h2>
+        {bolsistas.length > 0 ? (
+            bolsistas.map((bolsista) =>
+                bolsista && bolsista.id ? (
+                    <CardBolsista
+                        key={bolsista.id}
+                        id={bolsista.id}
+                        nome={bolsista.nome}
+                        areaAtuacao={bolsista.areaAtuacao}
+                        projeto_id={bolsista.projetoId}
+                        convenio={bolsista.convenio}
+                        valorBolsa={bolsista.valorBolsa}
+                        duracaoBolsa={bolsista.duracaoBolsa}
+                        cidade={bolsista.cidade}
+                        telefone={bolsista.telefone}
+                        cpf={bolsista.cpf}
+                    />
+                ) : null
+            )
+        ) : (
+            <p className="rela_nenhum">Não há nenhum bolsista cadastrado.</p>
+        )}
+    </div>
+)}
+
+{secaoAtiva === "convenios" && (
+    <div className="rela_secao">
+        <h2 className="rela_secao_titulo">Convênios Cadastrados</h2>
+        <div className="rela_convenios_cards">
+            {convenios.length > 0 ? (
+                convenios.map((convenio) =>
+                    convenio && convenio.id ? (
+                        <CardConvenio
+                            key={convenio.id}
+                            id={convenio.id}
+                            nome={convenio.nome}
+                            tipoConvenio={convenio.tipoConvenio}
+                            objetivo={convenio.objetivo}
+                            instituicao={convenio.instituicao}
+                            prazo={formatarData(convenio.prazo)}
+                        />
+                    ) : null
+                )
+            ) : (
+                <p className="rela_nenhum">Não há nenhum convênio cadastrado.</p>
+            )}
+        </div>
+    </div>
+)}
+
+{secaoAtiva === "materiais" && (
+    <div className="rela_secao">
+        <h2 className="rela_secao_titulo">Materiais Cadastrados</h2>
+        <div className="rela_materiais_cards">
+            {materiais.length > 0 ? (
+                materiais.map((material) =>
+                    material && material.id ? (
+                        <CardMaterial
+                            key={material.id}
+                            id={material.id}
+                            nome={material.nome}
+                            projetoAssociado={material.nomeProjeto?.split(" - ")[0]}
+                            quantidadeUsada={material.quantidadeUsada}
+                            valor={material.valor}
+                            fornecedor={material.fornecedor}
+                            descricao={material.descricao}
+                        />
+                    ) : null
+                )
+            ) : (
+                <p className="rela_nenhum">Não há nenhum material cadastrado.</p>
+            )}
+        </div>
+    </div>
+)}
+
+{secaoAtiva === "analises" && (
+    <div className="rela_secao">
+        <h2 className="rela_secao_titulo">Análises de Projeto Cadastradas</h2>
+        {analises.length > 0 ? (
+            analises.map((analise) =>
+                analise && analise.id ? (
+                    <CardAnalise
+                        key={analise.id}
+                        id={analise.id}
+                        valorGasto={analise.valorGasto}
+                        autor={analise.autor}
+                        informacoesAdicionais={analise.informacoesAdicionais}
+                        resultadoObtido={analise.resultadoObtido}
+                        idProjeto={analise.idProjeto}
+                    />
+                ) : null
+            )
+        ) : (
+            <p className="rela_nenhum">Não há nenhuma análise cadastrada.</p>
+        )}
+    </div>
+)}
+
             </div>
         </>
     );
