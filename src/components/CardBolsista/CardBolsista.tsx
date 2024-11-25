@@ -96,7 +96,15 @@ const CardBolsista: React.FC<CardBolsistaProps> = ({
         <div className="cabo_container">
             <div className="cabo_info">
                 <div className="cabo_esq">
-                    <img src={IconeBolsista} alt="Ícone Bolsista" />
+                    <img className="cabo_esq_img" src={IconeBolsista} alt="Ícone Bolsista" />
+                    <div className="cabo_botoes mobile">
+                        <div className="cabo_botoes botao" onClick={() => navigate(`/adm/bolsista/editar/${id}`)}>
+                        <img src={IconeEditar} alt="Ícone Editar" />
+                    </div>
+                        <div className="cabo_botoes botao excluir" onClick={excluirBolsista}>
+                        <img src={IconeLixeira} alt="Ícone Lixeira" />
+                </div>
+            </div>
                 </div>
                 <div className="cabo_meio_1">
                     <p><span>Nome: </span>{nome}</p>
@@ -114,7 +122,7 @@ const CardBolsista: React.FC<CardBolsistaProps> = ({
                     <p><span>CPF: </span>{cpf}</p>
                 </div>
             </div>
-            <div className="cabo_botoes">
+            <div className="cabo_botoes desktop">
                 <div className="cabo_botoes botao" onClick={() => navigate(`/adm/bolsista/editar/${id}`)}>
                     <img src={IconeEditar} alt="Ícone Editar" />
                 </div>

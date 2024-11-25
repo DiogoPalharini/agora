@@ -33,7 +33,7 @@
     font-weight: 500;
 }
 
-.cabo_esq img {
+.cabo_esq_img {
     background-color: #003383;
     padding: 8px;
     border-radius: 48px;
@@ -67,4 +67,40 @@
 
 .cabo_botoes.botao.excluir {
     background-color: #C92251
+}
+
+.cabo_botoes.mobile {
+    display: none;
+}
+
+@media only screen and (max-width: 1300px) {
+
+    .cabo_info {
+        flex-direction: column;
+        width: 100%;
+        gap: 24px;
+    }
+
+    .cabo_meio_1 {
+        margin-left: 0px;
+    }
+
+    .cabo_botoes.mobile {
+        display: flex;
+    }
+
+    .cabo_esq {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .cabo_botoes.desktop {
+        display: none;
+    }
+
+    .cabo_esq, .cabo_meio_1, .cabo_meio_2 {
+        padding-bottom: 24px;
+        border-bottom: 1px solid #C4C4C4;
+        margin-bottom: 0px;
+    }
 }
