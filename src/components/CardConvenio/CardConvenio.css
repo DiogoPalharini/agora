@@ -1,6 +1,6 @@
 .caco_container {
     display: flex;
-    align-items: center;
+    align-items: start;
     background-color: #F5F5F5;
     border-radius: 20px;
     padding: 32px;
@@ -100,5 +100,33 @@
 }
 
 .caco_botoes.botao.excluir {
-    background-color: #C92251
+    background-color: #C92251;
+}
+
+.caco_botoes.botao.excluir img {
+    width: 32px;
+}
+
+@media only screen and (max-width: 1200px) {
+    
+    .caco_container {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    
+    .caco_esq {
+        flex-direction: column;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .caco_botoes {
+        width: 100%;
+    }
+
+    .caco_botoes.botao {
+        width: 50%;
+    }
 }
