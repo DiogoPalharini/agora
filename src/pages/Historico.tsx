@@ -4,8 +4,6 @@ import IconePesquisar from "../img/pesquisar_cinza.svg";
 import IconeSeta from "../img/seta_data.svg"
 import CardHistorico from "../components/CardHistorico/CardHistorico";
 
-
-
 const Historico = () => {
 
     return (
@@ -38,9 +36,11 @@ const Historico = () => {
                 </div>
 
                 <div className="hist_cards">
-                    <CardHistorico nomeAdmin="Amanda Carambolas" projetoId={10} TipoAlteracao="Criação" DataAlteracao="14/11/2024"/>
-                    <CardHistorico nomeAdmin="Eduardo Novais" projetoId={20} TipoAlteracao="Edição" DataAlteracao="14/11/2024"/>
-                    <CardHistorico nomeAdmin="Bruna Paprika" projetoId={30} TipoAlteracao="Exclusão" DataAlteracao="14/11/2024"/>
+                    <CardHistorico nomeAdmin="Amanda Carambolas" alvoID={10} TipoAlteracao="criacao" DataAlteracao="14/11/2024" TipoAlvo="projeto"/>
+                    <CardHistorico nomeAdmin="Eduardo Novais" alvoID={20} TipoAlteracao="edicao" DataAlteracao="14/11/2024" TipoAlvo="projeto"/>
+                    <CardHistorico nomeAdmin="Bruna Paprika" alvoID={30} TipoAlteracao="exclusao" DataAlteracao="14/11/2024" TipoAlvo="projeto"/>
+                    <CardHistorico nomeAdmin="Amanda Shnapp" alvoID={40} TipoAlteracao="ativacao" DataAlteracao="14/11/2024" TipoAlvo="admin"/>
+                    <CardHistorico nomeAdmin="Glinda Maltezes" alvoID={50} TipoAlteracao="desativacao" DataAlteracao="14/11/2024" TipoAlvo="admin"/>
                 </div>
             </div>
         </>
