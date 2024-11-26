@@ -104,3 +104,44 @@
     padding-bottom: 16px;
     border-bottom: 1px solid #C4C4C4;
 }
+
+.cabo_botoes.botao.excluir img {
+    width: 32px;
+}
+
+@media only screen and (max-width: 1400px) {
+
+    .cana_baixo {
+        flex-direction: column-reverse;
+    }
+
+    .cana_baixo_esq, .cana_baixo_dir {
+        width: 100%;
+    }
+
+    .cana_baixo_dir {
+        padding-bottom: 32px;
+        border-bottom: 1px solid #C4C4C4;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+
+    .cana_baixo_dir_titulo {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+}
+
+@media only screen and (max-width: 800px) {
+
+    .cana_cima {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .cabo_botoes.botao {
+        width: 50%;
+    }
+}
