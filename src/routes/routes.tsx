@@ -25,6 +25,7 @@ import CadastrarMateriais from '../pages/CadastrarMateriais';
 import EstatisticasBolsistas from '../pages/Teste';
 import Historico from '../pages/Historico';
 import CadastrarAnalise from '../pages/CadastrarAnalise';
+import RelatorioAnual from '../pages/RelatorioAnual';
 
 
 interface LayoutProps {
@@ -196,6 +197,15 @@ export default function AppRoutes() {
             element={
               <PrivateRoutes tiposAllowed={[1]}>
                 <Historico />
+              </PrivateRoutes>
+            }
+          />
+
+          <Route
+            path="/adm/relatorioanual"
+            element={
+              <PrivateRoutes tiposAllowed={[1, 2]}>
+                <RelatorioAnual />
               </PrivateRoutes>
             }
           />
