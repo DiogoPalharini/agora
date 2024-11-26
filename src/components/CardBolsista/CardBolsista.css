@@ -18,6 +18,7 @@
 .cabo_esq {
     display: flex;
     align-items: center;
+   min-width: 64px;
 }
 
 .cabo_meio_1 {
