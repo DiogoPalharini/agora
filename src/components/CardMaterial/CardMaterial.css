@@ -7,7 +7,7 @@
     border-radius: 16px;
     width: 31.66%;
     color: #303030;
-    margin-bottom: 2.5%;
+    margin-bottom: 32px;
 }
 
 .cama_container span {
@@ -98,4 +98,11 @@
 
 .caco_botoes.botao.metade img {
     max-height: 32px;
+}
+
+@media only screen and (max-width: 1420px) {
+
+    .cama_container {
+        width: 100%;
+    }
 }

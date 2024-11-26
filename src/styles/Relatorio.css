@@ -127,6 +127,13 @@
     color: #003383;
 }
 
+@media only screen and (max-width: 1420px) {
+
+    .rela_materiais_cards {
+        flex-direction: column;
+    }
+}
+
 @media only screen and (max-width: 1200px) {
 
     .rela_convenios_cards {
