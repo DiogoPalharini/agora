@@ -30,11 +30,13 @@ const Notificacoes = () => {
                     Authorization: `Bearer ${adm?.token}`,
                 },
             });
+            console.log("Pedidos pendentes recebidos:", response.data);
             setPedidos(response.data);
         } catch (error) {
             console.error("Erro ao buscar dados dos pedidos:", error);
         }
     };
+    
 
     const handleAprovar = async (id: number) => {
         try {
@@ -136,14 +138,20 @@ const Notificacoes = () => {
         const hoje = new Date();
         const seteDias = new Date();
         seteDias.setDate(hoje.getDate() + 7);
-
+    
         const hojeFormatado = formatarData(hoje);
         const seteDiasFormatado = formatarData(seteDias);
-
+    
         const projetosFiltrados = projetos
             .filter((projeto) => {
+                if (!projeto.dataTermino || projeto.dataTermino.length !== 3) {
+                    // Ignora se a dataTermino for nula ou não tiver o formato esperado
+                    return false;
+                }
+    
                 const dataTermino = new Date(projeto.dataTermino[0], projeto.dataTermino[1] - 1, projeto.dataTermino[2]);
                 const dataTerminoFormatada = formatarData(dataTermino);
+    
                 return dataTerminoFormatada >= hojeFormatado && dataTerminoFormatada <= seteDiasFormatado;
             })
             .map((projeto) => ({
@@ -151,9 +159,10 @@ const Notificacoes = () => {
                 diasParaVencer: calcularDiasParaVencer(projeto.dataTermino),
             }))
             .sort((a, b) => a.diasParaVencer - b.diasParaVencer);
-
+    
         setProjetosFiltrados(projetosFiltrados);
     }, [projetos]);
+    
 
     useEffect(() => {
         fetchProjetos();

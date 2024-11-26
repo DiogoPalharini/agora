@@ -45,14 +45,14 @@ const EditarProjeto = () => {
     }>({ propostas: null, contratos: null, artigos: null });
     const [valorFormatado, setValorFormatado] = useState<string>('');
     const [fileName, setFileName] = useState({
-        propostas: 'Não há nenhum arquivo ainda.',
-        contratos: 'Não há nenhum arquivo ainda.',
-        artigos: 'Não há nenhum arquivo ainda.',
+        propostas: 'Nenhum arquivo selecionado.',
+        contratos: 'Nenhum arquivo selecionado.',
+        artigos: 'Nenhum arquivo selecionado.',
     });
     const [arquivosParaExcluir, setArquivosParaExcluir] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Função para carregar os dados do projeto
+    // Carregar dados do projeto
     useEffect(() => {
         const fetchProjeto = async () => {
             try {
@@ -66,6 +66,7 @@ const EditarProjeto = () => {
                 setValorFormatado(formatarValor(projeto.valor));
             } catch (error) {
                 console.error('Erro ao carregar o projeto:', error);
+                Toast.fire({ icon: 'error', title: 'Erro ao carregar projeto.' });
             } finally {
                 setIsLoading(false);
             }
@@ -74,19 +75,22 @@ const EditarProjeto = () => {
         if (adm && id) fetchProjeto();
     }, [adm, id]);
 
+    // Formatar valor para exibição
     const formatarValor = (valor: number | string) => {
         const valorNumerico = typeof valor === 'string' ? parseFloat(valor) : valor;
         return valorNumerico.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     };
 
+    // Formatar data para input
     const formatarDataParaInput = (dataArray: number[]): string => {
-      if (Array.isArray(dataArray) && dataArray.length === 3) {
-          const [ano, mes, dia] = dataArray;
-          return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
-      }
-      return '';
-  };
+        if (Array.isArray(dataArray) && dataArray.length === 3) {
+            const [ano, mes, dia] = dataArray;
+            return `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        }
+        return '';
+    };
 
+    // Manipulação de mudanças no formulário
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         if (name === 'valor') {
@@ -98,6 +102,7 @@ const EditarProjeto = () => {
         }
     };
 
+    // Manipulação de arquivos
     const handleArquivoChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, files } = e.target;
         if (files && files.length > 0) {
@@ -111,129 +116,107 @@ const EditarProjeto = () => {
         setArquivosExistentes((prev) => prev.filter((arquivo) => arquivo.id !== arquivoId));
     };
 
+    // Submissão do formulário
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-      e.preventDefault();
-  
-      const payload = {
-          ...formData,
-          adm: adm?.id,
-      };
-  
-      try {
-          if (adm?.tipo === 1) {
-              await salvarProjeto(payload);
-          } else {
-              await enviarSolicitacaoEdicao(payload);
-          }
-      } catch (error) {
-          console.error('Erro ao processar a submissão:', error);
-      }
-  };
-  
-  const salvarProjeto = async (payload: any) => {
-    try {
-        const data = new FormData();
+        const payload = {
+            ...formData,
+            adm: adm?.id,
+        };
 
-        // Adiciona o payload diretamente ao FormData
-        data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-
-        Object.entries(arquivosNovos).forEach(([tipo, file]) => {
-            if (file) data.append(tipo, file);
-        });
-
-        arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
-
-        await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
-            headers: { Authorization: `Bearer ${adm?.token}` },
-        });
-
-        Toast.fire({
-          icon: 'success',
-          title: 'Projeto atualizado com sucesso!',
-          position: 'top',
-          background: '#ffffff',
-          timerProgressBar: true,
-          didOpen: (toast) => {
-              toast.style.marginTop = '32px';
-              const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
-              if (progressBar) {
-                  progressBar.style.backgroundColor = '#28a745'; // Define a cor verde para a barra de progresso
-              }
-          }
-      });   
-        navigate("/");
-    } catch (error) {
-        console.error('Erro ao atualizar o projeto:', error);
-        Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
-    }
-};
-
-  
-  const enviarSolicitacaoEdicao = async (payload: any) => {
-      try {
-          const data = new FormData();
-  
-          // Criação do objeto com as informações do projeto para solicitação
-          const projetoInfo = {
-              referencia: payload.referencia,
-              nome: payload.nome,
-              empresa: payload.empresa,
-              objeto: payload.objeto,
-              descricao: payload.descricao,
-              coordenador: payload.coordenador,
-              ocultarValor: payload.ocultarValor,
-              ocultarEmpresa: payload.ocultarEmpresa,
-              valor: payload.valor,
-              dataInicio: payload.dataInicio,
-              dataTermino: payload.dataTermino,
-              situacao: payload.situacao,
-          };
-  
-          const solicitacaoPayload = {
-              adminSolicitanteId: adm?.id,
-              statusSolicitado: "Pendente",
-              projetoId: id,
-              informacaoProjeto: JSON.stringify(projetoInfo),
-              tipoAcao: "Editar",
-          };
-  
-          data.append('solicitacao', JSON.stringify(solicitacaoPayload));
-  
-          Object.entries(arquivosNovos).forEach(([tipo, file]) => {
-              if (file) data.append(tipo, file);
-          });
-  
-          await axios.post('http://localhost:8080/permissao/solicitarEdicao', data, {
-              headers: {
-                  Authorization: `Bearer ${adm?.token}`,
-                  'Content-Type': 'multipart/form-data',
-              },
-          });
-  
-          Toast.fire({
-            icon: 'success',
-            title: 'Solicitação de edição enviada com sucesso!',
-            position: 'top',
-            background: '#ffffff',
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.style.marginTop = '32px';
-                const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
-                if (progressBar) {
-                    progressBar.style.backgroundColor = '#28a745'; // Define a cor verde para a barra de progresso
-                }
+        try {
+            if (adm?.tipo === 1) {
+                await salvarProjeto(payload);
+            } else {
+                await enviarSolicitacaoEdicao(payload);
             }
-        });   
-          navigate("/");
-      } catch (error) {
-          console.error('Erro ao enviar solicitação de edição:', error);
-          Toast.fire({ icon: 'error', title: 'Erro ao enviar solicitação.' });
+        } catch (error) {
+            console.error('Erro ao processar a submissão:', error);
+        }
+    };
+
+    const salvarProjeto = async (payload: any) => {
+        try {
+            const data = new FormData();
+
+            data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+
+            Object.entries(arquivosNovos).forEach(([tipo, file]) => {
+                if (file) data.append(tipo, file);
+            });
+
+            arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
+
+            await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
+                headers: { Authorization: `Bearer ${adm?.token}` },
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Projeto atualizado com sucesso!',
+            });
+            navigate("/");
+        } catch (error) {
+            console.error('Erro ao atualizar o projeto:', error);
+            Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
+        }
+    };
+
+    const enviarSolicitacaoEdicao = async (payload: any) => {
+        try {
+            const data = new FormData();
+
+            const projetoInfo = {
+                referenciaProjeto: payload.referenciaProjeto,
+                nome: payload.nome,
+                empresa: payload.empresa,
+                objeto: payload.objeto,
+                descricao: payload.descricao,
+                coordenador: payload.coordenador,
+                ocultarValor: payload.ocultarValor,
+                ocultarEmpresa: payload.ocultarEmpresa,
+                valor: payload.valor,
+                dataInicio: payload.dataInicio,
+                dataTermino: payload.dataTermino,
+                situacao: payload.situacao,
+            };
+
+            const solicitacaoPayload = {
+                adminSolicitanteId: adm?.id,
+                statusSolicitado: "Pendente",
+                projetoId: id,
+                informacaoProjeto: JSON.stringify(projetoInfo),
+                tipoAcao: "Editar",
+            };
+
+            data.append('solicitacao', new Blob([JSON.stringify(solicitacaoPayload)], { type: 'application/json' }));
+
+            Object.entries(arquivosNovos).forEach(([tipo, file]) => {
+                if (file) data.append(tipo, file);
+            });
+
+            await axios.post('http://localhost:8080/permissao/solicitarEdicao', data, {
+                headers: {
+                    Authorization: `Bearer ${adm?.token}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            Toast.fire({
+                icon: 'success',
+                title: 'Solicitação de edição enviada com sucesso!',
+            });
+            navigate("/");
+        } catch (error) {
+            console.error('Erro ao enviar solicitação de edição:', error);
+            Toast.fire({ icon: 'error', title: 'Erro ao enviar solicitação.' });
         }
     };
 
     if (isLoading) return <div>Carregando...</div>;
     if (!formData) return <div>Erro: Projeto não encontrado.</div>;
+    
     return (
         <div className="cadpro_container">
           <Sidebar />

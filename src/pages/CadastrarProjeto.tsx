@@ -135,11 +135,55 @@ const CadastrarProjeto = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+  
     if (validateForm()) {
       const situacao = new Date(project.dataTermino) >= new Date() ? "Em Andamento" : "Encerrado";
-
-      if (adm?.tipo === 1) {
+  
+      if (adm?.tipo === 2) {
+        // Admin normal solicita permissão para cadastrar o projeto
+        const permissao = {
+          adminSolicitanteId: adm?.id,
+          statusSolicitado: "Pendente",
+          dataSolicitacao: new Date().toISOString().split('T')[0],
+          informacaoProjeto: JSON.stringify({
+            referenciaProjeto: project.referencia, // Referência única do projeto
+            nome: project.nome, // Nome do projeto
+            empresa: project.empresa, // Nome da empresa associada
+            objeto: project.objeto, // Objetivo do projeto (campo extenso)
+            descricao: project.descricao, // Descrição detalhada do projeto
+            coordenador: project.coordenador, // Nome do coordenador do projeto
+            ocultarValor: project.ocultarValor, // Flag para ocultar valor do projeto
+            ocultarEmpresa: project.ocultarEmpresa, // Flag para ocultar empresa associada
+            valor: parseFloat(project.valor.replace(/\D/g, '')) / 100, // Valor do projeto como número decimal
+            dataInicio: project.dataInicio, // Data de início do projeto no formato 'YYYY-MM-DD'
+            dataTermino: project.dataTermino, // Data de término do projeto no formato 'YYYY-MM-DD'
+            situacao: situacao, // Situação do projeto: "Em Andamento" ou "Encerrado"
+          }),
+          tipoAcao: "Criacao",
+        };      
+  
+        const formData = new FormData();
+        formData.append('solicitacao', new Blob([JSON.stringify(permissao)], { type: 'application/json' }));
+        if (project.propostas) formData.append('propostas', project.propostas);
+        if (project.contratos) formData.append('contratos', project.contratos);
+        if (project.artigos) formData.append('artigos', project.artigos);
+  
+        try {
+          await axios.post('http://localhost:8080/permissao/solicitarCriacao', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${adm?.token}`,
+            },
+          });
+          Toast.fire({
+            icon: 'success',
+            title: 'Solicitação de criação de projeto enviada com sucesso!',
+          });
+          navigate("/");
+        } catch (error) {
+          erroror('Não foi possível solicitar a criação da permissão.');
+        }
+      } else if (adm?.tipo === 1) {
         // SuperAdmin cadastra o projeto diretamente
         const formData = new FormData();
         const projeto = {
@@ -155,14 +199,14 @@ const CadastrarProjeto = () => {
           dataInicio: project.dataInicio,
           dataTermino: project.dataTermino,
           situacao: situacao,
-          adm: adm?.id
+          adm: adm?.id,
         };
-
+  
         formData.append('projeto', new Blob([JSON.stringify(projeto)], { type: 'application/json' }));
         if (project.propostas) formData.append('propostas', project.propostas);
         if (project.contratos) formData.append('contratos', project.contratos);
         if (project.artigos) formData.append('artigos', project.artigos);
-
+  
         try {
           await axios.post('http://localhost:8080/projeto/cadastrar', formData, {
             headers: {
@@ -173,74 +217,17 @@ const CadastrarProjeto = () => {
           Toast.fire({
             icon: 'success',
             title: 'Projeto cadastrado com sucesso!',
-            position: 'top',
-            background: '#ffffff',
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.style.marginTop = '32px';
-                const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
-                if (progressBar) {
-                    progressBar.style.backgroundColor = '#28a745'; // Define a cor verde para a barra de progresso
-                }
-            }
-        });   
+          });
           navigate("/");
         } catch (error) {
           erroror('Não foi possível cadastrar o projeto.');
         }
-      } else if (adm?.tipo === 2) {
-        // Admin normal solicita permissão para cadastrar o projeto
-        const permissao = {
-          adminSolicitanteId: adm?.id,
-          statusSolicitado: "Pendente",
-          dataSolicitacao: new Date().toISOString().split('T')[0],
-          informacaoProjeto: JSON.stringify({
-            referenciaProjeto: project.referencia,
-            nome: project.nome,
-            empresa: project.empresa,
-            objeto: project.objeto,
-            descricao: project.descricao,
-            coordenador: project.coordenador,
-            ocultarValor: project.ocultarValor,
-            ocultarEmpresa: project.ocultarEmpresa,
-            valor: parseFloat(project.valor.replace(/\D/g, '')) / 100,
-            dataInicio: project.dataInicio,
-            dataTermino: project.dataTermino,
-            situacao: situacao,
-          }),
-          tipoAcao: "Criacao"
-        };
-
-        try {
-          await axios.post('http://localhost:8080/permissao/solicitarCriacao', permissao, {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${adm?.token}`,
-            },
-          });
-          Toast.fire({
-            icon: 'success',
-            title: 'Solicitação de criação de projeto enviada com sucesso!',
-            position: 'top',
-            background: '#ffffff',
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.style.marginTop = '32px';
-                const progressBar = toast.querySelector('.swal2-timer-progress-bar') as HTMLElement;
-                if (progressBar) {
-                    progressBar.style.backgroundColor = '#28a745'; // Define a cor verde para a barra de progresso
-                }
-            }
-        });   
-          navigate("/");
-        } catch (error) {
-          erroror('Não foi possível solicitar a criação da permissão.');
-        }
       }
     } else {
-      erroror('Não foi possível processar o formulário.');
+      erroror('Por favor, corrija os erros no formulário.');
     }
   };
+  
 
   return (
     <div className="cadpro_container">
