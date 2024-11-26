@@ -6,11 +6,13 @@
     border-radius: 20px;
     padding: 32px;
     color: #303030;
+    margin-bottom: 32px;
 }
 
 .cabo_info {
     display: flex;
     gap: 48px;
+    width: 90%;
 }
 
 .cabo_esq {
@@ -27,6 +29,22 @@
     flex-direction: column;
     gap: 8px;
     margin-bottom: -8px;
+    width: 33%;
+}
+
+.cabo_meio_1 p, .cabo_meio_2 p, .cabo_Dir p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cabo_info_bolsista {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .cabo_meio_1 span, .cabo_meio_2 span, .cabo_dir span {

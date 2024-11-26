@@ -188,11 +188,11 @@ const Relatorio = () => {
                 </div>
 
                 <div className="rela_mostrar">
-                    <div className={`rela_mostrar_botao ${secaoAtiva === "bolsistas" ? "primario" : "secundario"}`} onClick={() => ativarSecao("bolsistas")}>
+                    <div className={`rela_mostrar_botao cima ${secaoAtiva === "bolsistas" ? "primario" : "secundario"}`} onClick={() => ativarSecao("bolsistas")}>
                         <img src={secaoAtiva === "bolsistas" ? IconeBolsista : IconeBolsistaSecundario} />
                         <p>Bolsistas</p>
                     </div>
-                    <div className={`rela_mostrar_botao ${secaoAtiva === "convenios" ? "primario" : "secundario"}`} onClick={() => ativarSecao("convenios")}>
+                    <div className={`rela_mostrar_botao cima ${secaoAtiva === "convenios" ? "primario" : "secundario"}`} onClick={() => ativarSecao("convenios")}>
                         <img src={secaoAtiva === "convenios" ? IconeConvenio : IconeConvenioSecundario} />
                         <p>Convênios</p>
                     </div>
@@ -218,7 +218,6 @@ const Relatorio = () => {
                         nome={bolsista.nome}
                         areaAtuacao={bolsista.areaAtuacao}
                         projeto_id={bolsista.projetoId}
-                        convenio={bolsista.convenio}
                         valorBolsa={bolsista.valorBolsa}
                         duracaoBolsa={bolsista.duracaoBolsa}
                         cidade={bolsista.cidade}

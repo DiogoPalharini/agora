@@ -277,18 +277,6 @@ const CadastrarBolsista = () => {
                                 required
                             />
                         </div>
-                        <div className="criad_form_linha_input">
-                            <label htmlFor="areaAtuacao">Área de Atuação:</label>
-                            <input
-                                type="text"
-                                id="areaAtuacao"
-                                name="areaAtuacao"
-                                value={novoBolsista.areaAtuacao}
-                                onChange={handleChange}
-                                placeholder="Digite aqui..."
-                                required
-                            />
-                        </div>
                     </div>
 
                     <div className="criad_form_linha baixo">
@@ -309,20 +297,18 @@ const CadastrarBolsista = () => {
                                 ))}
                             </select>
                         </div>
+
                         <div className="criad_form_linha_input">
-                            <label htmlFor="convenio">Convênio</label>
-                            <select
-                                id="convenio"
-                                name="convenio"
-                                value={novoBolsista.convenio}
+                            <label htmlFor="areaAtuacao">Área de Atuação:</label>
+                            <input
+                                type="text"
+                                id="areaAtuacao"
+                                name="areaAtuacao"
+                                value={novoBolsista.areaAtuacao}
                                 onChange={handleChange}
+                                placeholder="Digite aqui..."
                                 required
-                            >
-                                <option value="">Selecione um Convênio</option>
-                                <option value="teste01">Teste 01</option>
-                                <option value="teste02">Teste 02</option>
-                                <option value="teste03">Teste 03</option>
-                            </select>
+                            />
                         </div>
                     </div>
 
