@@ -14,6 +14,7 @@ import jsPDF from 'jspdf';
 import BaixarPDF from "../img/baixar_pdf.svg"
 import BaixarExcel from "../img/baixar_excel.svg"
 import Logo from "../img/logotipo_FAPG_azul.svg"
+import * as XLSX from 'xlsx';
 
 interface Arquivo {
     id: number;
@@ -149,6 +150,71 @@ const InformacoesProjeto = () => {
             if (infoLogo) infoLogo.style.display = 'none';
         }
     };
+
+    const gerarExcel = async () => {
+        // Selecionar os elementos a serem ocultados e estilizados
+        const infoproTitulo = document.querySelector('.infopro_titulo') as HTMLElement;
+        const infoproCima = document.querySelector('.infopro_cima') as HTMLElement;
+        const infoproCimaDir = document.querySelector('.infopro_cima_dir') as HTMLElement;
+        const arquivosContainer = document.querySelector('.infopro_arquivos') as HTMLElement;
+        const infoproGerar = document.querySelector('.infopro_gerar') as HTMLElement;
+        const infoLogo = document.querySelector('.infopro_pdf_logo') as HTMLElement;
+
+        // Adicionar classe temporária ao título para aplicar estilos com !important
+        if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
+
+        if (infoLogo) infoLogo.style.display = 'block';
+
+        // Aplicar estilos temporários
+        if (infoproCima) infoproCima.style.background = 'none';
+
+        // Ocultar as divs
+        if (infoproCimaDir) infoproCimaDir.style.display = 'none';
+        if (arquivosContainer) arquivosContainer.style.display = 'none';
+        if (infoproGerar) infoproGerar.style.display = 'none';
+
+        const elemento = document.querySelector('.infopro_container') as HTMLElement;
+        if (!elemento) return;
+
+        try {
+            // Capturar os dados do elemento para o Excel
+            const rows: string[][] = [];
+
+            // Exemplo: se houver uma tabela dentro de .infopro_container
+            const tabela = elemento.querySelector('table');
+            if (tabela) {
+                tabela.querySelectorAll('tr').forEach((linha) => {
+                    const row: string[] = [];
+                    linha.querySelectorAll('td, th').forEach((celula) => {
+                        row.push(celula.textContent || '');
+                    });
+                    rows.push(row);
+                });
+            } else {
+                // Caso não seja uma tabela, apenas adiciona o texto do elemento
+                rows.push([elemento.textContent || '']);
+            }
+
+            // Criar a planilha e o workbook
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Informações');
+
+            // Salvar o arquivo Excel
+            XLSX.writeFile(wb, 'informacoes_projeto.xlsx');
+        } catch (error) {
+            console.error('Erro ao gerar Excel:', error);
+        } finally {
+            // Remover a classe temporária e restaurar a visibilidade dos elementos
+            if (infoproTitulo) infoproTitulo.classList.remove('infopro_pdf_titulo');
+            if (infoproCima) infoproCima.style.background = '';
+            if (infoproCimaDir) infoproCimaDir.style.display = 'flex';
+            if (arquivosContainer) arquivosContainer.style.display = 'flex';
+            if (infoproGerar) infoproGerar.style.display = 'flex';
+            if (infoLogo) infoLogo.style.display = 'none';
+        }
+    };
+
     
     const deletarProjeto = () => {
         if (adm?.tipo === 2) {
@@ -362,7 +428,7 @@ const InformacoesProjeto = () => {
                     </div>
                     <div className="infopro_gerar">
                         <BotaoCTA img={BaixarPDF} escrito="Exportar para PDF" aparencia="primario" onClick={gerarPDF} />
-                        <BotaoCTA img={BaixarExcel} escrito="Exportar para Excel" aparencia="primario" cor="verde" onClick={gerarPDF} />
+                        <BotaoCTA img={BaixarExcel} escrito="Exportar para Excel" aparencia="primario" cor="verde" onClick={gerarExcel} />
                     </div>
                 </div>
             </div>
