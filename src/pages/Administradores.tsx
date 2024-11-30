@@ -43,7 +43,7 @@ export const Administradores = () => {
         try {
             const novoStatus = !currentStatus; // Inverte o status atual
             await axios.patch(
-                `http://localhost:8080/adm/atualizarStatus/${id}`,
+                `http://localhost:8080/adm/atualizarStatus/${id}/${adm?.id}`,
                 { ativo: novoStatus },
                 {
                     headers: { Authorization: `Bearer ${adm?.token}` },

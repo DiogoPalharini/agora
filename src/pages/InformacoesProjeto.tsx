@@ -299,7 +299,12 @@ const InformacoesProjeto = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    axios.delete(`http://localhost:8080/projeto/excluir/${projeto.id}`, {
+
+                    axios.delete(`http://localhost:8080/projeto/excluir`, {
+                        data: {
+                            id: projeto.id,
+                            admAlterador: adm?.id
+                        },
                         headers: {
                             Authorization: `Bearer ${adm?.token}`
                         }

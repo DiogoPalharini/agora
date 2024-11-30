@@ -64,6 +64,10 @@ const EditarProjeto = () => {
                 projeto.dataTermino = formatarDataParaInput(projeto.dataTermino);
                 setFormData(projeto);
                 setValorFormatado(formatarValor(projeto.valor));
+                if (adm?.id) {
+                    setFormData((prevData) => (prevData ? { ...prevData, adm: adm.id } : prevData));
+                }
+                console.log()
             } catch (error) {
                 console.error('Erro ao carregar o projeto:', error);
                 Toast.fire({ icon: 'error', title: 'Erro ao carregar projeto.' });
@@ -121,8 +125,7 @@ const EditarProjeto = () => {
         e.preventDefault();
 
         const payload = {
-            ...formData,
-            adm: adm?.id,
+            ...formData
         };
 
         try {
