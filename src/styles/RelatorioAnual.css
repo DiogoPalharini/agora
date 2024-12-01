@@ -1,16 +1,21 @@
+.relanual_cima {
+    width: auto;
+    margin: 128px 5% -64px;
+
+}
+
 .relanual_container {
-    width: 100%;
-    margin-left: -17.5% !important;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    width: auto;
+    margin: 0 5%;
 }
 
 .relanual_title {
     font-size: 2rem;
-    color: #002d62; /* Azul escuro */
+    color: #003383;
     text-align: left;
-    margin-bottom: 20px;
+    margin-top: 128px;
+    margin-bottom: 32px;
+    font-weight: 600 !important;
 }
 
 .relanual_table {
@@ -24,7 +29,7 @@
 }
 
 .relanual_table th {
-    color: #002d62; /* Azul escuro */
+    color: #003383;
     font-weight: bold;
     text-align: left;
     padding: 10px;
@@ -38,15 +43,20 @@
 }
 
 .relanual_summary {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 32px;
+    gap: 20px;
 }
 
 .relanual_summary strong {
-    color: #002d62; /* Azul escuro */
+    color: #003383;
 }
 
 .relanual_chart {
-    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin-top: 64px;
     padding: 20px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
@@ -57,15 +67,6 @@
 .relanual_convenio_container {
     width: 100%;
     margin: 0 auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-}
-
-.relanual_convenio_title {
-    font-size: 2rem;
-    color: #002d62; /* Azul escuro */
-    text-align: left;
-    margin-bottom: 20px;
 }
 
 .relanual_convenio_table {
@@ -79,7 +80,7 @@
 }
 
 .relanual_convenio_table th {
-    color: #002d62; /* Azul escuro */
+    color: #003383;
     font-weight: bold;
     text-align: left;
     padding: 10px;
@@ -93,7 +94,9 @@
 }
 
 .relanual_convenio_chart {
-    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin-top: 64px;
     padding: 20px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
@@ -104,15 +107,7 @@
 .relanual_material_container {
     width: 100%;
     margin: 0 auto;
-    padding: 20px;
     font-family: Arial, sans-serif;
-}
-
-.relanual_material_title {
-    font-size: 2rem;
-    color: #002d62; /* Azul escuro */
-    text-align: left;
-    margin-bottom: 20px;
 }
 
 .relanual_material_table {
@@ -126,7 +121,7 @@
 }
 
 .relanual_material_table th {
-    color: #002d62; /* Azul escuro */
+    color: #003383;
     font-weight: bold;
     text-align: left;
     padding: 10px;
@@ -140,7 +135,9 @@
 }
 
 .relanual_material_chart {
-    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    margin-top: 64px;
     padding: 20px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
@@ -151,16 +148,9 @@
 .relanual_analise_container {
     width: 100%;
     margin: 0 auto;
-    padding: 20px;
     font-family: Arial, sans-serif;
 }
 
-.relanual_analise_title {
-    font-size: 2rem;
-    color: #002d62; /* Azul escuro */
-    text-align: left;
-    margin-bottom: 20px;
-}
 
 .relanual_analise_table {
     width: 100%;
@@ -173,7 +163,7 @@
 }
 
 .relanual_analise_table th {
-    color: #002d62; /* Azul escuro */
+    color: #003383;
     font-weight: bold;
     text-align: left;
     padding: 10px;
@@ -184,4 +174,14 @@
     padding: 10px;
     border-bottom: 1px solid #e8f4fa;
     text-align: left;
+}
+
+.relanual_extra {
+    width: 35%;
+    display: flex;
+    gap: 20px;
+}
+
+.relanual_extra button {
+    width: 100%;
 }

@@ -1,11 +1,13 @@
 import { useEffect, useState, useContext } from "react";
 import "../styles/RelatorioAnual.css"
+import BotaoCTA from "../components/BotaoCTA/BotaoCTA";
 import axios from "axios";
 import { useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Bar } from "react-chartjs-2";
 import { AuthContext } from "../hook/ContextAuth";
+import IconeDownload from "../img/download.svg";
 import {
     Chart as ChartJS,
     BarElement,
@@ -15,8 +17,17 @@ import {
     Tooltip,
     Legend,
 } from "chart.js";
+import { useNavigate } from "react-router-dom";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+
+ChartJS.defaults.plugins.legend.labels.font = {
+    size: 12, // 32px (2rem)
+  };
+  
+  ChartJS.defaults.plugins.title.font = {
+    size: 20, // Também ajusta os títulos
+  };
 
 interface Bolsista {
     id: number;
@@ -61,6 +72,9 @@ interface AnaliseProjeto {
 
 
 export default function RelatorioAnual() {
+
+    const navigate = useNavigate();
+
     const [bolsistas, setBolsistas] = useState<Bolsista[]>([]);
     const [bolsistasPorArea, setBolsistasPorArea] = useState<Map<string, number>>(new Map());
     const [totalValorBolsas, setTotalValorBolsas] = useState(0);
@@ -72,6 +86,17 @@ export default function RelatorioAnual() {
     const [analises, setAnalises] = useState<AnaliseProjeto[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
     const { adm } = useContext(AuthContext);
+
+    useEffect(() => {
+        // Adiciona a classe no-margin ao body
+        document.body.classList.add("no-margin");
+    
+        // Remove a classe no-margin ao desmontar o componente
+        return () => {
+            document.body.classList.remove("no-margin");
+        };
+    }, []);
+    
 
     const listarConvenios = async () => {
         try {
@@ -222,7 +247,6 @@ export default function RelatorioAnual() {
         listarQuantidadePorFornecedor();
     }, []);
 
-    // Data for charts
     const chartDataProjeto = {
         labels: Array.from(materiaisPorProjeto.keys()),
         datasets: [
@@ -335,119 +359,123 @@ export default function RelatorioAnual() {
             const pdf = new jsPDF("p", "mm", "a4");
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
-            const elements = containerRef.current.children;
+            const sections = containerRef.current.querySelectorAll(".relanual_section");
     
-            let currentY = 10; // Margem inicial na página
-            const margin = 10;
+            const margin = 10; // Margem inicial
+            let currentY = margin; // Posição Y atual na página
     
-            for (let i = 0; i < elements.length; i++) {
-                const element = elements[i] as HTMLElement;
+            for (const section of sections) {
+                const sectionEl = section as HTMLElement;
     
-                // Verifica se é um H1 (nova página para títulos)
-                if (element.tagName === "H1") {
-                    if (currentY > margin) {
-                        pdf.addPage();
-                        currentY = margin;
-                    }
-    
-                    // Renderiza o H1
-                    const canvas = await html2canvas(element, {
-                        scale: 2,
-                        backgroundColor: null, // Fundo transparente
-                    });
-                    const imgData = canvas.toDataURL("image/png");
-                    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-                    // Adiciona um fundo branco antes da imagem
-                    pdf.setFillColor(255, 255, 255); // Fundo branco
-                    pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
-    
-                    pdf.addImage(imgData, "PNG", margin, currentY, pdfWidth - 2 * margin, imgHeight);
-                    currentY += imgHeight + 5;
-                } else {
-                    // Renderiza o conteúdo subsequente ao H1
-                    const canvas = await html2canvas(element, {
-                        scale: 2,
-                        backgroundColor: null, // Fundo transparente
-                    });
-                    const imgData = canvas.toDataURL("image/png");
-                    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-                    if (currentY + imgHeight > pdfHeight - margin) {
-                        pdf.addPage();
-                        currentY = margin;
-                    }
-    
-                    pdf.addImage(imgData, "PNG", margin, currentY, pdfWidth - 2 * margin, imgHeight);
-                    currentY += imgHeight + 5;
+                // Adiciona nova página para cada seção
+                if (currentY > margin) {
+                    pdf.addPage();
+                    currentY = margin; // Reseta a posição Y para o topo
                 }
+    
+                // Renderiza a seção inteira
+                const canvas = await html2canvas(sectionEl, {
+                    scale: 2,
+                    backgroundColor: null, // Fundo transparente
+                });
+                const imgData = canvas.toDataURL("image/png");
+                const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+                if (currentY + imgHeight > pdfHeight - margin) {
+                    pdf.addPage();
+                    currentY = margin;
+                }
+    
+                pdf.addImage(imgData, "PNG", margin, currentY, pdfWidth - 2 * margin, imgHeight);
+                currentY += imgHeight + 5;
             }
     
             pdf.save("relatorio-anual.pdf");
         } catch (error) {
             console.error("Erro ao gerar PDF:", error);
         }
-    };    
+    };                    
     
     return (
-        <div>
-            <button onClick={downloadAsPDF} className="download-button">
-                Baixar Relatório como PDF
-            </button>
+        <>
+            <div className="relanual_cima">
+                <div className="rela_gerar">
+                    <p>Clique no botão à direita para baixar o relatório anual com todas as informações abaixo.</p>
+                    <div className="relanual_extra">
+                    <BotaoCTA
+                        escrito="Voltar"
+                        aparencia="primario"
+                        onClick={() => navigate('/adm/relatorio')}
+                    />
+                    <BotaoCTA
+                        img={IconeDownload}
+                        escrito="Baixar Relatório"
+                        aparencia="primario"
+                        cor="verde"
+                        onClick={downloadAsPDF}
+                    />
+                    </div>
+                </div>
+            </div>
             <div className="relanual_container" ref={containerRef}>
-                <h1 className="relanual_title">Bolsistas</h1>
-                {bolsistas.length > 0 ? (
-                    <table className="relanual_table">
-                        <thead>
-                            <tr>
-                                <th>Nome completo</th>
-                                <th>CPF</th>
-                                <th>Telefone</th>
-                                <th>Cidade</th>
-                                <th>Projeto</th>
-                                <th>Área de Atuação</th>
-                                <th>Valor da Bolsa</th>
-                                <th>Duração da Bolsa</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bolsistas.map((bolsista) => (
-                                <tr key={bolsista.id}>
-                                    <td>{bolsista.nome}</td>
-                                    <td>{bolsista.cpf}</td>
-                                    <td>{bolsista.telefone}</td>
-                                    <td>{bolsista.cidade}</td>
-                                    <td>{bolsista.projetoId}</td>
-                                    <td>
-                                        {Array.isArray(bolsista.areaAtuacao)
-                                            ? bolsista.areaAtuacao.join(', ')
-                                            : bolsista.areaAtuacao || 'Não especificado'}
-                                    </td>
-                                    <td>
-                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-                                            parseFloat(bolsista.valorBolsa)
-                                        )}
-                                    </td>
-                                    <td>{bolsista.duracaoBolsa} meses</td>
+                {/* Seção de Bolsistas */}
+                <section className="relanual_section">
+                    <h1 className="relanual_title">Bolsistas</h1>
+                    {bolsistas.length > 0 ? (
+                        <table className="relanual_table">
+                            <thead>
+                                <tr>
+                                    <th>Nome completo</th>
+                                    <th>CPF</th>
+                                    <th>Telefone</th>
+                                    <th>Cidade</th>
+                                    <th>Projeto</th>
+                                    <th>Área de Atuação</th>
+                                    <th>Valor da Bolsa</th>
+                                    <th>Duração da Bolsa</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <p>Não há nenhum bolsista cadastrado.</p>
-                )}
-                <div className="relanual_summary">
-                    <p><strong>Número total de bolsistas:</strong> {bolsistas.length}</p>
-                    <p>
-                        <strong>Valor total das bolsas:</strong>{' '}
-                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValorBolsas)}
-                    </p>
-                </div>
-                <div className="relanual_chart">
-                    <Bar data={chartData} options={chartOptions} />
-                </div>
-                <div className="relanual_convenio_container">
-                    <h1 className="relanual_convenio_title">Convênios</h1>
+                            </thead>
+                            <tbody>
+                                {bolsistas.map((bolsista) => (
+                                    <tr key={bolsista.id}>
+                                        <td>{bolsista.nome}</td>
+                                        <td>{bolsista.cpf}</td>
+                                        <td>{bolsista.telefone}</td>
+                                        <td>{bolsista.cidade}</td>
+                                        <td>{bolsista.projetoId}</td>
+                                        <td>
+                                            {Array.isArray(bolsista.areaAtuacao)
+                                                ? bolsista.areaAtuacao.join(', ')
+                                                : bolsista.areaAtuacao || 'Não especificado'}
+                                        </td>
+                                        <td>
+                                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
+                                                parseFloat(bolsista.valorBolsa)
+                                            )}
+                                        </td>
+                                        <td>{bolsista.duracaoBolsa} meses</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>Não há nenhum bolsista cadastrado.</p>
+                    )}
+                    <div className="relanual_summary">
+                        <p><strong>Número total de bolsistas:</strong> {bolsistas.length}</p>
+                        <p>
+                            <strong>Valor total das bolsas:</strong>{' '}
+                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValorBolsas)}
+                        </p>
+                    </div>
+                    <div className="relanual_chart">
+                        <Bar data={chartData} options={chartOptions} />
+                    </div>
+                </section>
+    
+                {/* Seção de Convênios */}
+                <section className="relanual_section">
+                    <h1 className="relanual_title">Convênios</h1>
                     {convenios.length > 0 ? (
                         <table className="relanual_convenio_table">
                             <thead>
@@ -477,9 +505,11 @@ export default function RelatorioAnual() {
                     <div className="relanual_convenio_chart">
                         <Bar data={chartDataConvenio} options={chartOptionsConvenio} />
                     </div>
-                </div>
-                <div className="relanual_material_container">
-                    <h1 className="relanual_material_title">Materiais</h1>
+                </section>
+    
+                {/* Seção de Materiais */}
+                <section className="relanual_section">
+                    <h1 className="relanual_title">Materiais</h1>
                     {materiais.length > 0 ? (
                         <table className="relanual_material_table">
                             <thead>
@@ -497,7 +527,7 @@ export default function RelatorioAnual() {
                                 {materiais.map((material) => {
                                     const valorUnitario = parseFloat(material.valor);
                                     const valorTotalCompra = material.quantidadeUsada * valorUnitario;
-
+    
                                     return (
                                         <tr key={material.id}>
                                             <td>{material.nome}</td>
@@ -526,16 +556,16 @@ export default function RelatorioAnual() {
                         <p>Não há materiais cadastrados.</p>
                     )}
                     <div className="relanual_material_chart">
-                        <h3>Materiais por Projeto</h3>
                         <Bar data={chartDataProjeto} options={chartOptionsMaterialProjeto} />
                     </div>
                     <div className="relanual_material_chart">
-                        <h3>Quantidade por Fornecedor</h3>
                         <Bar data={chartDataFornecedor} options={chartOptionsMaterialFornecedor} />
                     </div>
-                </div>
-                <div className="relanual_analise_container">
-                    <h1 className="relanual_analise_title">Análises de Projeto</h1>
+                </section>
+    
+                {/* Seção de Análises de Projeto */}
+                <section className="relanual_section">
+                    <h1 className="relanual_title">Análises de Projeto</h1>
                     {analises.length > 0 ? (
                         <table className="relanual_analise_table">
                             <thead>
@@ -569,7 +599,8 @@ export default function RelatorioAnual() {
                     ) : (
                         <p>Não há análises de projeto cadastradas.</p>
                     )}
-                </div>
+                </section>
             </div>
-        </div>
-    )};
+        </>
+    );
+};
