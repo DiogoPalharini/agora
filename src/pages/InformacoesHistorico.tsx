@@ -1,8 +1,10 @@
 import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode } from "react";
+import "../styles/InformacoesHistorico.css";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useContext } from "react";
 import { AuthContext } from "../hook/ContextAuth";
+import { Sidebar } from "../components/Sidebar/Sidebar";
 
 interface Historico {
   id: string;
@@ -61,8 +63,8 @@ const InformacoesHistorico = () => {
           return (
             <div key={key}>
               <strong>{key}:</strong>{" "}
-              <span style={{ color: "red" }}>{JSON.stringify(antigoValor)}</span>{" "}
-              <span style={{ color: "green" }}>{JSON.stringify(novoValor)}</span>
+              <span style={{ color: "#ED3C5C" }}>{JSON.stringify(antigoValor)}</span>{" "}
+              <span style={{ color: "#19670C" }}>{JSON.stringify(novoValor)}</span>
             </div>
           );
         } else {
@@ -77,9 +79,9 @@ const InformacoesHistorico = () => {
 
     let color: string;
     if (tipo === "criacao" || tipo === "ativacao") {
-      color = "green";
+      color = "#19670C";
     } else if (tipo === "delecao" || tipo === "desativacao") {
-      color = "red";
+      color = "#ED3C5C";
     }
     return Object.keys(dados).map((key) => (
       <div key={key} style={{ color }}>
@@ -98,20 +100,20 @@ const InformacoesHistorico = () => {
     const mantidos = arquivosAtuais.filter((arquivo: string) => arquivosAntigosSet.has(arquivo));
 
     return (
-      <div>
-        <h4>Arquivos:</h4>
+      <div className="infoh_arquivo">
+        <h4 className="infoh_arquivo_titulo">Arquivos:</h4>
         {removidos.map((arquivo) => (
-          <div key={arquivo} style={{ color: "red" }}>
+          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#ED3C5C" }}>
             <strong>Removido:</strong> {arquivo}
           </div>
         ))}
         {adicionados.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
-          <div key={arquivo} style={{ color: "green" }}>
+          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#19670C" }}>
             <strong>Adicionado:</strong> {arquivo}
           </div>
         ))}
         {mantidos.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
-          <div key={arquivo} style={{ color: "black" }}>
+          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#404040" }}>
             <strong>Mantido:</strong> {arquivo}
           </div>
         ))}
@@ -133,13 +135,37 @@ const InformacoesHistorico = () => {
 
   const { alterado, arquivos } = historico;
 
+  const formatarAlteracao = (alteracao: string) => {
+    switch (alteracao) {
+      case "edicao":
+        return "Edição";
+      case "criacao":
+        return "Criação";
+      case "delecao":
+        return "Exclusão";
+    }
+  };
+  
+  const formatarAlterado = (alterado: string) => {
+    switch (alterado) {
+      case "projeto":
+        return "Projeto";
+      case "admin":
+        return "Administrador";
+    }
+  };
+  
+
   return (
-    <div>
-      <h1>Visualizar Histórico</h1>
-      <h3>Ação: {historico.alteracao}</h3>
-      <h3>Tipo: {alterado}</h3>
-      <div>
-        <h4>Dados:</h4>
+    <>
+    <Sidebar />
+    <div className="infoh_container">
+      <h1 className="infoh_titulo">Visualizar Alterações</h1>
+      <div className="infoh_cima">
+        <h3><span>Ação:</span> {formatarAlteracao(historico.alteracao)} </h3>
+        <h3><span>Tipo:</span> {formatarAlterado(alterado)} </h3>
+      </div>
+      <div className="infoh_dados">
         {renderDados(dados, historico.alteracao)}
       </div>
       {alterado === "projeto" && (
@@ -148,6 +174,7 @@ const InformacoesHistorico = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
