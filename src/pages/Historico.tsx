@@ -6,6 +6,7 @@ import CardHistorico from "../components/CardHistorico/CardHistorico";
 import axios from "axios";
 import { AuthContext } from "../hook/ContextAuth";
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Historico {
   id: number;
@@ -21,6 +22,7 @@ interface Historico {
 const Historico = () => {
   const { adm } = useContext(AuthContext);
   const [historicos, setHistoricos] = useState<Historico[]>([]);
+  const navigate = useNavigate();
 
   const fetchHistoricos = async () => {
     try {
@@ -28,6 +30,7 @@ const Historico = () => {
         headers: { Authorization: `Bearer ${adm?.token}` },
       });
       setHistoricos(response.data);
+      console.log(response.data);
     } catch (error) {
       console.error("Erro ao buscar históricos:", error);
     }
@@ -36,6 +39,10 @@ const Historico = () => {
   useEffect(() => {
     fetchHistoricos();
   }, []);
+
+  const handleCardClick = (id: number) => {
+    navigate(`/adm/historico/${id}`);
+  };
 
   return (
     <>
@@ -71,14 +78,16 @@ const Historico = () => {
 
         <div className="hist_cards">
           {historicos.map((historico) => (
-            <CardHistorico
-              key={historico.id}
-              nomeAdmin={historico.admAlterador}
-              alvoID={historico.idAlterado}
-              TipoAlteracao={historico.alteracao as "criacao" | "edicao" | "delecao" | "ativacao" | "desativacao"}
-              DataAlteracao={new Date(historico.dataAlteracao).toLocaleDateString()}
-              TipoAlvo={historico.alterado as "projeto" | "admin"}
-            />
+            <div key={historico.id} onClick={() => handleCardClick(historico.id)}>
+              <CardHistorico
+                id={historico.id}
+                nomeAdmin={historico.admAlterador}
+                alvoID={historico.idAlterado}
+                TipoAlteracao={historico.alteracao as "criacao" | "edicao" | "delecao" | "ativacao" | "desativacao"}
+                DataAlteracao={new Date(historico.dataAlteracao).toLocaleDateString()}
+                TipoAlvo={historico.alterado as "projeto" | "admin"}
+              />
+            </div>
           ))}
         </div>
       </div>

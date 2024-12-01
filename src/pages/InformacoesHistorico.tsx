@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useContext } from "react";
@@ -6,9 +6,11 @@ import { AuthContext } from "../hook/ContextAuth";
 
 interface Historico {
   id: string;
+  alteracao: string;
   tipoHistorico: string;
   alterado: string;
   dados: string;
+  arquivos: string;
 }
 
 const InformacoesHistorico = () => {
@@ -16,6 +18,7 @@ const InformacoesHistorico = () => {
   const { id } = useParams();
   const [historico, setHistorico] = useState<Historico | null>(null);
   const [dadosAntigos, setDadosAntigos] = useState<{ [key: string]: any } | null>(null);
+  const [arquivosAntigos, setArquivosAntigos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,14 +30,15 @@ const InformacoesHistorico = () => {
         });
         setHistorico(response.data);
 
-        if (response.data.tipoHistorico === "Edição") {
+        if (response.data.alteracao === "edicao") {
           const ultimoResponse = await axios.get(
-            `http://localhost:8080/historico/ultimo/${response.data.idAlterado}/${response.data.alterado}`,
+            `http://localhost:8080/historico/ultimo/${response.data.idAlterado}/${response.data.alterado}/${response.data.id}`,
             {
               headers: { Authorization: `Bearer ${adm?.token}` },
             }
           );
           setDadosAntigos(JSON.parse(ultimoResponse.data.dados));
+          setArquivosAntigos(ultimoResponse.data.arquivos ? JSON.parse(ultimoResponse.data.arquivos) : []);
         }
       } catch (err: any) {
         console.error("Erro ao buscar histórico:", err);
@@ -48,7 +52,7 @@ const InformacoesHistorico = () => {
   }, [id, adm]);
 
   const renderDados = (dados: { [key: string]: any }, tipo: string) => {
-    if (tipo === "Edição" && dadosAntigos) {
+    if (tipo === "edicao" && dadosAntigos) {
       return Object.keys(dados).map((key) => {
         const novoValor = dados[key];
         const antigoValor = dadosAntigos[key];
@@ -71,12 +75,48 @@ const InformacoesHistorico = () => {
       });
     }
 
-    const color = tipo === "Criação" ? "green" : "red";
+    let color: string;
+    if (tipo === "criacao" || tipo === "ativacao") {
+      color = "green";
+    } else if (tipo === "delecao" || tipo === "desativacao") {
+      color = "red";
+    }
     return Object.keys(dados).map((key) => (
       <div key={key} style={{ color }}>
         <strong>{key}:</strong> {JSON.stringify(dados[key])}
       </div>
     ));
+  };
+
+  const renderArquivos = (arquivos: string) => {
+    const arquivosAtuais = arquivos ? JSON.parse(arquivos) : [];
+    const arquivosAntigosSet = new Set(arquivosAntigos);
+    const arquivosAtuaisSet = new Set(arquivosAtuais);
+
+    const adicionados = arquivosAtuais.filter((arquivo: string) => !arquivosAntigosSet.has(arquivo));
+    const removidos = arquivosAntigos.filter((arquivo) => !arquivosAtuaisSet.has(arquivo));
+    const mantidos = arquivosAtuais.filter((arquivo: string) => arquivosAntigosSet.has(arquivo));
+
+    return (
+      <div>
+        <h4>Arquivos:</h4>
+        {removidos.map((arquivo) => (
+          <div key={arquivo} style={{ color: "red" }}>
+            <strong>Removido:</strong> {arquivo}
+          </div>
+        ))}
+        {adicionados.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
+          <div key={arquivo} style={{ color: "green" }}>
+            <strong>Adicionado:</strong> {arquivo}
+          </div>
+        ))}
+        {mantidos.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
+          <div key={arquivo} style={{ color: "black" }}>
+            <strong>Mantido:</strong> {arquivo}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   if (loading) return <p>Carregando...</p>;
@@ -91,17 +131,22 @@ const InformacoesHistorico = () => {
     return <p>Erro ao carregar os dados do histórico.</p>;
   }
 
-  const { tipoHistorico, alterado } = historico;
+  const { alterado, arquivos } = historico;
 
   return (
     <div>
       <h1>Visualizar Histórico</h1>
-      <h3>Ação: {tipoHistorico}</h3>
+      <h3>Ação: {historico.alteracao}</h3>
       <h3>Tipo: {alterado}</h3>
       <div>
         <h4>Dados:</h4>
-        {renderDados(dados, tipoHistorico)}
+        {renderDados(dados, historico.alteracao)}
       </div>
+      {alterado === "projeto" && (
+        <div>
+          {renderArquivos(arquivos)}
+        </div>
+      )}
     </div>
   );
 };

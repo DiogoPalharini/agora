@@ -1,17 +1,18 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./CardHistorico.css";
 import IconeCriacao from "../../img/criacao_historico.svg";
 import IconeEdicao from "../../img/editar_projeto.svg";
 import IconeDelecao from "../../img/lixeira.svg";
-import IconeAtivacao from "../../img/unplug_verde.svg"
-import IconeDesativacao from "../../img/unplug_vermelho.svg"
+import IconeAtivacao from "../../img/unplug_verde.svg";
+import IconeDesativacao from "../../img/unplug_vermelho.svg";
 import IconeCalendario from "../../img/calendario.svg";
-import IconeVer from "../../img/olho_ver.svg"
+import IconeVer from "../../img/olho_ver.svg";
 import axios from "axios";
 import { AuthContext } from "../../hook/ContextAuth";
 import { Link } from "react-router-dom";
 
 interface AlteracaoProjetoProps {
+  id: number;
   nomeAdmin: number;
   alvoID: number;
   DataAlteracao: string;
@@ -19,22 +20,25 @@ interface AlteracaoProjetoProps {
   TipoAlvo: "projeto" | "admin";
 }
 
-const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, DataAlteracao, TipoAlteracao, TipoAlvo }) => {
+const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ id, nomeAdmin, alvoID, DataAlteracao, TipoAlteracao, TipoAlvo }) => {
   const { adm } = useContext(AuthContext);
-  const [adminName, setAdminName] = React.useState<string>("");
+  const [adminName, setAdminName] = useState<string>("");
 
-  const fetchAdminName = async (idAdmin: number) => {
-    try {
-      const response = await axios.get(`http://localhost:8080/adm/${idAdmin}`, {
-        headers: { Authorization: `Bearer ${adm?.token}` },
-      });
-      const adminCorrespondente = response.data;
-      setAdminName(adminCorrespondente.nome);
-    } catch (error) {
-      console.error(`Erro ao buscar nome do admin ${idAdmin}:`, error);
-    }
-  };
-  fetchAdminName(nomeAdmin);
+  useEffect(() => {
+    const fetchAdminName = async (idAdmin: number) => {
+      try {
+        const response = await axios.get(`http://localhost:8080/adm/${idAdmin}`, {
+          headers: { Authorization: `Bearer ${adm?.token}` },
+        });
+        const adminCorrespondente = response.data;
+        setAdminName(adminCorrespondente.nome);
+      } catch (error) {
+        console.error(`Erro ao buscar nome do admin ${idAdmin}:`, error);
+      }
+    };
+
+    fetchAdminName(nomeAdmin);
+  }, [nomeAdmin, adm]);
 
   const getIcone = () => {
     switch (TipoAlteracao) {
@@ -123,7 +127,7 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
             </div>
           </div>
             <div className="cahi_ver">
-              <Link to={`/adm/historico/${alvoID}`}>
+              <Link to={`/adm/historico/${id}`}>
               <img src={IconeVer} alt="Ver Histórico" />
               </Link>
             </div>
