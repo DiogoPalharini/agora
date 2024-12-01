@@ -52,44 +52,61 @@ const InformacoesHistorico = () => {
 
     fetchHistorico();
   }, [id, adm]);
-
+  
   const renderDados = (dados: { [key: string]: any }, tipo: string) => {
+    if (!dados || Object.keys(dados).length === 0) {
+      return <p>Não há dados disponíveis para exibição.</p>;
+    }
+  
+    const camposExcluidos = ["senha", "adm", "id", "isSenhaRedefinida", "tokenRedefinicao"]; // Lista de campos que não devem ser exibidos
+  
+    const removeDoubleQuotes = (value: any) => {
+      return JSON.stringify(value).replace(/"/g, ""); // Remove aspas duplas
+    };
+  
     if (tipo === "edicao" && dadosAntigos) {
-      return Object.keys(dados).map((key) => {
-        const novoValor = dados[key];
-        const antigoValor = dadosAntigos[key];
-
-        if (JSON.stringify(novoValor) !== JSON.stringify(antigoValor)) {
-          return (
-            <div key={key}>
-              <strong>{key}:</strong>{" "}
-              <span style={{ color: "#ED3C5C" }}>{JSON.stringify(antigoValor)}</span>{" "}
-              <span style={{ color: "#19670C" }}>{JSON.stringify(novoValor)}</span>
-            </div>
-          );
-        } else {
-          return (
-            <div key={key}>
-              <strong>{key}:</strong> {JSON.stringify(novoValor)}
-            </div>
-          );
-        }
-      });
+      return Object.keys(dados)
+        .filter((key) => !camposExcluidos.includes(key)) // Ignora campos na lista
+        .map((key) => {
+          const novoValor = dados[key];
+          const antigoValor = dadosAntigos[key];
+  
+          if (JSON.stringify(novoValor) !== JSON.stringify(antigoValor)) {
+            return (
+              <div key={key}>
+                <strong>{key}:</strong>{" "}
+                <span style={{ color: "#ED3C5C" }}>{removeDoubleQuotes(antigoValor)}</span>{" "}
+                <span style={{ color: "#19670C" }}>{removeDoubleQuotes(novoValor)}</span>
+              </div>
+            );
+          } else {
+            return (
+              <div key={key}>
+                <strong>{key}:</strong> {removeDoubleQuotes(novoValor)}
+              </div>
+            );
+          }
+        });
     }
-
+  
     let color: string;
-    if (tipo === "criacao" || tipo === "ativacao") {
-      color = "#19670C";
-    } else if (tipo === "delecao" || tipo === "desativacao") {
-      color = "#ED3C5C";
+    if (["ativacao", "desativacao", "criacao", "delecao"].includes(tipo)) {
+      color = "#404040"; // Preto
+    } else if (tipo === "edicao") {
+      color = "#19670C"; // Verde para edições
+    } else {
+      color = "#ED3C5C"; // Vermelho para exclusões
     }
-    return Object.keys(dados).map((key) => (
-      <div key={key} style={{ color }}>
-        <strong>{key}:</strong> {JSON.stringify(dados[key])}
-      </div>
-    ));
+  
+    return Object.keys(dados)
+      .filter((key) => !camposExcluidos.includes(key)) // Ignora campos na lista
+      .map((key) => (
+        <div key={key} style={{ color }}>
+          <strong>{key}:</strong> {removeDoubleQuotes(dados[key])}
+        </div>
+      ));
   };
-
+  
   const renderArquivos = (arquivos: string) => {
     const arquivosAtuais = arquivos ? JSON.parse(arquivos) : [];
     const arquivosAntigosSet = new Set(arquivosAntigos);
@@ -143,6 +160,10 @@ const InformacoesHistorico = () => {
         return "Criação";
       case "delecao":
         return "Exclusão";
+      case "ativacao":
+        return "Ativação"
+      case "desativacao":
+        return "Desativação"
     }
   };
   
