@@ -23,7 +23,9 @@ const Historico = () => {
   const { adm } = useContext(AuthContext);
   const [historicos, setHistoricos] = useState<Historico[]>([]);
   const [adminNames, setAdminNames] = useState<Record<number, string>>({});
-  const [searchTerm, setSearchTerm] = useState(""); // Estado para o termo de busca
+  const [searchTerm, setSearchTerm] = useState(""); // Busca por nome
+  const [startDate, setStartDate] = useState<string | null>(null); // Data de início
+  const [endDate, setEndDate] = useState<string | null>(null); // Data de fim
   const navigate = useNavigate();
 
   const fetchHistoricos = async () => {
@@ -56,7 +58,6 @@ const Historico = () => {
   }, []);
 
   useEffect(() => {
-    // Busca os nomes dos administradores com base no ID
     historicos.forEach((historico) => {
       fetchAdminName(historico.admAlterador);
     });
@@ -66,10 +67,21 @@ const Historico = () => {
     navigate(`/adm/historico/${id}`);
   };
 
-  // Filtrar os históricos com base no nome do administrador
+  // Função para verificar se um histórico está dentro do intervalo de datas
+  const isWithinDateRange = (dataAlteracao: string) => {
+    if (!startDate || !endDate) return true; // Só aplica filtro se ambas as datas estiverem preenchidas
+    const data = new Date(dataAlteracao).getTime();
+    const start = new Date(startDate).getTime();
+    const end = new Date(endDate).getTime();
+    return data >= start && data <= end;
+  };
+
+  // Filtrar os históricos por nome e data
   const filteredHistoricos = historicos.filter((historico) => {
     const adminName = adminNames[historico.admAlterador] || ""; // Nome do admin pelo ID
-    return adminName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesName = adminName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDate = isWithinDateRange(historico.dataAlteracao);
+    return matchesName && matchesDate; // Deve satisfazer ambos os critérios
   });
 
   return (
@@ -96,37 +108,44 @@ const Historico = () => {
           <div className="hist_datas">
             <div>
               <h2>INÍCIO</h2>
-              <input type="date" />
+              <input
+                type="date"
+                value={startDate || ""}
+                onChange={(e) => setStartDate(e.target.value || null)} // Atualiza a data de início
+              />
             </div>
             <img src={IconeSeta} alt="Ícone seta" />
             <div>
               <h2>FIM</h2>
-              <input type="date" />
+              <input
+                type="date"
+                value={endDate || ""}
+                onChange={(e) => setEndDate(e.target.value || null)} // Atualiza a data de fim
+              />
             </div>
           </div>
         </div>
 
         <div className="hist_cards">
-        {filteredHistoricos.length > 0 ? (
-          [...filteredHistoricos] // Cria uma cópia do array
-            .reverse() // Inverte a ordem
-            .map((historico) => (
-              <div key={historico.id} onClick={() => handleCardClick(historico.id)}>
-                <CardHistorico
-                  id={historico.id}
-                  nomeAdmin={historico.admAlterador}
-                  alvoID={historico.idAlterado}
-                  TipoAlteracao={historico.alteracao as "criacao" | "edicao" | "delecao" | "ativacao" | "desativacao"}
-                  DataAlteracao={new Date(historico.dataAlteracao).toLocaleDateString()}
-                  TipoAlvo={historico.alterado as "projeto" | "admin"}
-                />
-              </div>
-            ))
-        ) : (
-          <p className="hist_nenhum">Nenhum resultado de busca.</p>
-        )}
-      </div>
-
+          {filteredHistoricos.length > 0 ? (
+            [...filteredHistoricos]
+              .reverse() // Inverte a ordem dos históricos
+              .map((historico) => (
+                <div key={historico.id} onClick={() => handleCardClick(historico.id)}>
+                  <CardHistorico
+                    id={historico.id}
+                    nomeAdmin={historico.admAlterador}
+                    alvoID={historico.idAlterado}
+                    TipoAlteracao={historico.alteracao as "criacao" | "edicao" | "delecao" | "ativacao" | "desativacao"}
+                    DataAlteracao={new Date(historico.dataAlteracao).toLocaleDateString()}
+                    TipoAlvo={historico.alterado as "projeto" | "admin"}
+                  />
+                </div>
+              ))
+          ) : (
+            <p className="hist_nenhum">Nenhum resultado de busca</p>
+          )}
+        </div>
       </div>
     </>
   );
