@@ -1,10 +1,11 @@
-import { useState, useEffect, JSXElementConstructor, Key, ReactElement, ReactNode } from "react";
-import "../styles/InformacoesHistorico.css";
+import { useState, useEffect} from "react";
+import { formatarCampo } from "./formatarCampo";
+import "../../styles/InformacoesHistorico.css";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useContext } from "react";
-import { AuthContext } from "../hook/ContextAuth";
-import { Sidebar } from "../components/Sidebar/Sidebar";
+import { AuthContext } from "../../hook/ContextAuth";
+import { Sidebar } from "../../components/Sidebar/Sidebar";
 
 interface Historico {
   id: string;
@@ -58,54 +59,88 @@ const InformacoesHistorico = () => {
       return <p>Não há dados disponíveis para exibição.</p>;
     }
   
-    const camposExcluidos = ["senha", "adm", "id", "isSenhaRedefinida", "tokenRedefinicao"]; // Lista de campos que não devem ser exibidos
+    const camposExcluidos = ["senha", "adm", "id", "isSenhaRedefinida", "tokenRedefinicao"];
   
-    const removeDoubleQuotes = (value: any) => {
-      return JSON.stringify(value).replace(/"/g, ""); // Remove aspas duplas
-    };
-  
-    if (tipo === "edicao" && dadosAntigos) {
-      return Object.keys(dados)
-        .filter((key) => !camposExcluidos.includes(key)) // Ignora campos na lista
+    const renderSubDados = (
+      subdados: { [key: string]: any },
+      subdadosAntigos: { [key: string]: any } | null,
+      subTipo: string
+    ) => {
+      return Object.keys(subdados)
+        .filter((key) => !camposExcluidos.includes(key))
         .map((key) => {
-          const novoValor = dados[key];
-          const antigoValor = dadosAntigos[key];
+          const novoValor = subdados[key];
+          const antigoValor = subdadosAntigos ? subdadosAntigos[key] : null;
+          const valorFormatadoNovo = formatarCampo(subTipo, key, novoValor);
+          const valorFormatadoAntigo = formatarCampo(subTipo, key, antigoValor);
   
-          if (JSON.stringify(novoValor) !== JSON.stringify(antigoValor)) {
+          const [chaveNovo, ...valorArrayNovo] = valorFormatadoNovo.split(":");
+          const valorNovo = valorArrayNovo.join(":").trim();
+  
+          const [, ...valorArrayAntigo] = valorFormatadoAntigo.split(":");
+          const valorAntigo = valorArrayAntigo.join(":").trim();
+  
+          if (tipo === "edicao" && antigoValor !== undefined && JSON.stringify(novoValor) !== JSON.stringify(antigoValor)) {
             return (
               <div key={key}>
-                <strong>{key}:</strong>{" "}
-                <span style={{ color: "#ED3C5C" }}>{removeDoubleQuotes(antigoValor)}</span>{" "}
-                <span style={{ color: "#19670C" }}>{removeDoubleQuotes(novoValor)}</span>
-              </div>
-            );
-          } else {
-            return (
-              <div key={key}>
-                <strong>{key}:</strong> {removeDoubleQuotes(novoValor)}
+                <span style={{ fontWeight: "500" }}>{chaveNovo}:</span>{" "}
+                <span style={{ color: "#ED3C5C" }}>{valorAntigo} (Antes)</span>{" "}
+                <span style={{ color: "#19670C" }}>{valorNovo} (Depois)</span>
               </div>
             );
           }
-        });
-    }
   
-    let color: string;
-    if (["ativacao", "desativacao", "criacao", "delecao"].includes(tipo)) {
-      color = "#404040"; // Preto
-    } else if (tipo === "edicao") {
-      color = "#19670C"; // Verde para edições
-    } else {
-      color = "#ED3C5C"; // Vermelho para exclusões
-    }
+          return (
+            <div key={key}>
+              <span style={{ fontWeight: "500" }}>{chaveNovo}:</span> {valorNovo}
+            </div>
+          );
+        });
+    };
   
     return Object.keys(dados)
-      .filter((key) => !camposExcluidos.includes(key)) // Ignora campos na lista
-      .map((key) => (
-        <div key={key} style={{ color }}>
-          <strong>{key}:</strong> {removeDoubleQuotes(dados[key])}
-        </div>
-      ));
+      .filter((key) => !camposExcluidos.includes(key))
+      .map((key) => {
+        const value = dados[key];
+        const antigoValor = dadosAntigos ? dadosAntigos[key] : null;
+        const valorFormatadoNovo = formatarCampo(tipo, key, value);
+        const valorFormatadoAntigo = formatarCampo(tipo, key, antigoValor);
+  
+        const [chaveNovo, ...valorArrayNovo] = valorFormatadoNovo.split(":");
+        const valorNovo = valorArrayNovo.join(":").trim();
+  
+        const [, ...valorArrayAntigo] = valorFormatadoAntigo.split(":");
+        const valorAntigo = valorArrayAntigo.join(":").trim();
+  
+        if (typeof value === "object" && !Array.isArray(value)) {
+          return (
+            <div key={key}>
+              <span style={{ fontWeight: "500" }}>{chaveNovo}:</span>
+              <div style={{ paddingLeft: "1rem" }}>{renderSubDados(value, antigoValor, tipo)}</div>
+            </div>
+          );
+        }
+  
+        // Exibir antes e depois para valores simples
+        if (tipo === "edicao" && antigoValor !== undefined && JSON.stringify(value) !== JSON.stringify(antigoValor)) {
+          return (
+            <div key={key}>
+              <span style={{ fontWeight: "500" }}>{chaveNovo}:</span>{" "}
+              <span style={{ color: "#ED3C5C" }}>{valorAntigo}</span>{" "}
+              <span style={{ color: "#19670C" }}>{valorNovo}</span>
+            </div>
+          );
+        }
+  
+        return (
+          <div key={key}>
+            <span style={{ fontWeight: "500" }}>{chaveNovo}:</span> {valorNovo}
+          </div>
+        );
+      });
   };
+  
+
   
   const renderArquivos = (arquivos: string) => {
     const arquivosAtuais = arquivos ? JSON.parse(arquivos) : [];
@@ -119,25 +154,33 @@ const InformacoesHistorico = () => {
     return (
       <div className="infoh_arquivo">
         <h4 className="infoh_arquivo_titulo">Arquivos:</h4>
-        {removidos.map((arquivo) => (
-          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#ED3C5C" }}>
-            <strong>Removido:</strong> {arquivo}
+        {removidos.length === 0 && adicionados.length === 0 && mantidos.length === 0 ? (
+          <p className="infoh_arquivo_vazio">Não houve nenhuma mudança de arquivos.</p>
+        ) : (
+          <>
+          <div className="infoh_arquivo_cards">
+            {removidos.map((arquivo: any) => (
+              <div className="infoh_arquivo_card" key={arquivo}>
+                <p><strong style={{ color: "#ED3C5C", fontWeight: "500"}}>Removido:</strong> ID {arquivo}</p>
+              </div>
+            ))}
+            {adicionados.map((arquivo: any) => (
+              <div className="infoh_arquivo_card" key={arquivo}>
+                <p><strong style={{ color: "#19670C", fontWeight: "500"}}>Adicionado:</strong> ID {arquivo}</p>
+              </div>
+            ))}
+            {mantidos.map((arquivo: any) => (
+              <div className="infoh_arquivo_card" key={arquivo}>
+                <p><strong style={{ color: "#404040", fontWeight: "500"}}>Mantido:</strong> ID {arquivo}</p>
+              </div>
+            ))}
           </div>
-        ))}
-        {adicionados.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
-          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#19670C" }}>
-            <strong>Adicionado:</strong> {arquivo}
-          </div>
-        ))}
-        {mantidos.map((arquivo: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Key | null | undefined) => (
-          <div className="infoh_arquivo_card" key={arquivo} style={{ color: "#404040" }}>
-            <strong>Mantido:</strong> {arquivo}
-          </div>
-        ))}
+          </>
+        )}
       </div>
     );
   };
-
+    
   if (loading) return <p>Carregando...</p>;
   if (error) return <p>{error}</p>;
   if (!historico) return <p>Histórico não encontrado.</p>;

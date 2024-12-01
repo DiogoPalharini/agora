@@ -26,7 +26,7 @@ import EstatisticasBolsistas from '../pages/Teste';
 import Historico from '../pages/Historico';
 import CadastrarAnalise from '../pages/CadastrarAnalise';
 import RelatorioAnual from '../pages/RelatorioAnual';
-import InformacoesHistorico from '../pages/InformacoesHistorico';
+import InformacoesHistorico from '../pages/InformacoesHistorico/InformacoesHistorico';
 
 
 interface LayoutProps {

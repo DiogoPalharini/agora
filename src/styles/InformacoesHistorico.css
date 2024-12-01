@@ -63,8 +63,8 @@
 
 .infoh_arquivo_titulo {
     font-weight: 500;
-    margin-bottom: 20px;
-    margin-top: 20px;
+    margin-bottom: 16px;
+    margin-top: 16px;
 }
 
 .infoh_arquivo_card {
@@ -72,4 +72,18 @@
     padding: 16px;
     border-radius: 8px;
     width: 200px;
+}
+
+.infoh_arquivo_vazio {
+    background-color: #F5F5F5;
+    padding: 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #606060;
+}
+
+.infoh_arquivo_cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
 }
