@@ -1,22 +1,40 @@
-import React from "react";
+import React, { useContext } from "react";
 import "./CardHistorico.css";
 import IconeCriacao from "../../img/criacao_historico.svg";
 import IconeEdicao from "../../img/editar_projeto.svg";
-import IconeExclusao from "../../img/lixeira.svg";
+import IconeDelecao from "../../img/lixeira.svg";
 import IconeAtivacao from "../../img/unplug_verde.svg"
 import IconeDesativacao from "../../img/unplug_vermelho.svg"
 import IconeCalendario from "../../img/calendario.svg";
 import IconeVer from "../../img/olho_ver.svg"
+import axios from "axios";
+import { AuthContext } from "../../hook/ContextAuth";
+import { Link } from "react-router-dom";
 
 interface AlteracaoProjetoProps {
-  nomeAdmin: string;
+  nomeAdmin: number;
   alvoID: number;
   DataAlteracao: string;
-  TipoAlteracao: "criacao" | "edicao" | "exclusao" | "ativacao" | "desativacao";
+  TipoAlteracao: "criacao" | "edicao" | "delecao" | "ativacao" | "desativacao";
   TipoAlvo: "projeto" | "admin";
 }
 
 const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, DataAlteracao, TipoAlteracao, TipoAlvo }) => {
+  const { adm } = useContext(AuthContext);
+  const [adminName, setAdminName] = React.useState<string>("");
+
+  const fetchAdminName = async (idAdmin: number) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/adm/${idAdmin}`, {
+        headers: { Authorization: `Bearer ${adm?.token}` },
+      });
+      const adminCorrespondente = response.data;
+      setAdminName(adminCorrespondente.nome);
+    } catch (error) {
+      console.error(`Erro ao buscar nome do admin ${idAdmin}:`, error);
+    }
+  };
+  fetchAdminName(nomeAdmin);
 
   const getIcone = () => {
     switch (TipoAlteracao) {
@@ -24,8 +42,8 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
         return IconeEdicao;
       case "criacao":
         return IconeCriacao;
-      case "exclusao":
-        return IconeExclusao;
+      case "delecao":
+        return IconeDelecao;
       case "ativacao":
         return IconeAtivacao;
       case "desativacao":
@@ -39,7 +57,7 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
         return 'editou';
       case 'criacao':
         return 'cadastrou';
-      case 'exclusao':
+      case 'delecao':
         return 'excluiu';
       case 'ativacao':
         return 'reativou';
@@ -54,12 +72,12 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
         return 'edicao';
       case 'criacao':
         return 'criacao';
-      case 'exclusao':
-        return 'exclusao';
+      case 'delecao':
+        return 'delecao';
       case 'ativacao':
         return 'criacao';
       case 'desativacao':
-        return 'exclusao';
+        return 'delecao';
     }
   };
 
@@ -78,7 +96,7 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
         return 'Edição';
       case 'criacao':
         return 'Criação';
-      case 'exclusao':
+      case 'delecao':
         return 'Exclusão';
       case 'ativacao':
         return 'Ativação';
@@ -94,7 +112,7 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
         </div>
         <div className="cahi_meio">
             <h2 className={`cahi_titulo ${getClasseTipoAlteracao()}`}>{formatarTitulo()}</h2>
-            <p>O administrador {nomeAdmin} {getVerboAcao()} o {formatarTipoAlvo()} ID {alvoID}</p>
+            <p>O administrador {adminName} {getVerboAcao()} o {formatarTipoAlvo()} ID {alvoID}</p>
         </div>
         <div className="cahi_dir">
           <div>
@@ -105,7 +123,9 @@ const AlteracaoProjeto: React.FC<AlteracaoProjetoProps> = ({ nomeAdmin, alvoID, 
             </div>
           </div>
             <div className="cahi_ver">
-              <img src={IconeVer} />
+              <Link to={`/adm/historico/${alvoID}`}>
+              <img src={IconeVer} alt="Ver Histórico" />
+              </Link>
             </div>
         </div>
     </div>
