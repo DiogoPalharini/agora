@@ -183,8 +183,8 @@ const Relatorio = () => {
                 </div>
 
                 <div className="rela_gerar">
-                    <p>Clique no botão à direita para gerar e baixar um PDF com o relatório de toda a atividade do ano atual.</p>
-                    <BotaoCTA img={IconeDownload} escrito="Baixar Relatório" aparencia="primario" cor="verde" />
+                    <p>Clique no botão à direita para visualizar o relatório anual.</p>
+                    <BotaoCTA img={IconeDownload} escrito="Ver Relatório Anual" aparencia="primario" cor="verde" onClick={() => navigate('/adm/relatorioAnual')}/>
                 </div>
 
                 <div className="rela_mostrar">
