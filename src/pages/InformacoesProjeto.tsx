@@ -15,6 +15,7 @@ import BaixarPDF from "../img/baixar_pdf.svg"
 import BaixarExcel from "../img/baixar_excel.svg"
 import Logo from "../img/logotipo_FAPG_azul.svg"
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 interface Arquivo {
     id: number;
@@ -151,61 +152,72 @@ const InformacoesProjeto = () => {
         }
     };
 
+
     const gerarExcel = async () => {
-        // Selecionar os elementos a serem ocultados e estilizados
         const infoproTitulo = document.querySelector('.infopro_titulo') as HTMLElement;
         const infoproCima = document.querySelector('.infopro_cima') as HTMLElement;
         const infoproCimaDir = document.querySelector('.infopro_cima_dir') as HTMLElement;
         const arquivosContainer = document.querySelector('.infopro_arquivos') as HTMLElement;
         const infoproGerar = document.querySelector('.infopro_gerar') as HTMLElement;
         const infoLogo = document.querySelector('.infopro_pdf_logo') as HTMLElement;
-
-        // Adicionar classe temporária ao título para aplicar estilos com !important
-        if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
-
-        if (infoLogo) infoLogo.style.display = 'block';
-
+    
         // Aplicar estilos temporários
+        if (infoproTitulo) infoproTitulo.classList.add('infopro_pdf_titulo');
+        if (infoLogo) infoLogo.style.display = 'block';
         if (infoproCima) infoproCima.style.background = 'none';
-
-        // Ocultar as divs
         if (infoproCimaDir) infoproCimaDir.style.display = 'none';
         if (arquivosContainer) arquivosContainer.style.display = 'none';
         if (infoproGerar) infoproGerar.style.display = 'none';
-
+    
         const elemento = document.querySelector('.infopro_container') as HTMLElement;
         if (!elemento) return;
-
+    
         try {
-            // Capturar os dados do elemento para o Excel
-            const rows: string[][] = [];
-
-            // Exemplo: se houver uma tabela dentro de .infopro_container
-            const tabela = elemento.querySelector('table');
-            if (tabela) {
-                tabela.querySelectorAll('tr').forEach((linha) => {
-                    const row: string[] = [];
-                    linha.querySelectorAll('td, th').forEach((celula) => {
-                        row.push(celula.textContent || '');
-                    });
-                    rows.push(row);
-                });
-            } else {
-                // Caso não seja uma tabela, apenas adiciona o texto do elemento
-                rows.push([elemento.textContent || '']);
-            }
-
-            // Criar a planilha e o workbook
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Informações');
-
-            // Salvar o arquivo Excel
-            XLSX.writeFile(wb, 'informacoes_projeto.xlsx');
+            // Inicializar workbook e worksheet
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Informações');
+    
+            // Configurar colunas
+            worksheet.columns = [{ width: 50 }];
+    
+            const titulos = elemento.querySelectorAll('.infopro_info_titulo');
+            const textos = elemento.querySelectorAll('.infopro_info_texto');
+    
+            titulos.forEach((titulo, index) => {
+                const texto = textos[index]?.textContent?.trim() || '';
+    
+                // Adicionar título com fundo azul
+                const tituloRow = worksheet.addRow([titulo.textContent?.trim() || '']);
+                tituloRow.getCell(1).fill = {
+                    type: 'pattern',
+                    pattern: 'solid',
+                    fgColor: { argb: '0000FF' }, // Fundo azul
+                };
+                tituloRow.getCell(1).font = { bold: true, color: { argb: 'FFFFFF' } }; // Texto branco
+                tituloRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+    
+                // Adicionar texto correspondente
+                if (texto) {
+                    const textoRow = worksheet.addRow([texto]);
+                    textoRow.getCell(1).font = { color: { argb: '000000' } }; // Texto preto
+                    textoRow.getCell(1).alignment = { horizontal: 'left', vertical: 'top' };
+                }
+    
+                // Adicionar uma linha vazia para espaçamento
+                worksheet.addRow([]);
+            });
+    
+            // Gerar o arquivo Excel
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'informacoes_projeto.xlsx';
+            link.click();
         } catch (error) {
             console.error('Erro ao gerar Excel:', error);
         } finally {
-            // Remover a classe temporária e restaurar a visibilidade dos elementos
+            // Restaurar os estilos originais
             if (infoproTitulo) infoproTitulo.classList.remove('infopro_pdf_titulo');
             if (infoproCima) infoproCima.style.background = '';
             if (infoproCimaDir) infoproCimaDir.style.display = 'flex';
@@ -214,6 +226,11 @@ const InformacoesProjeto = () => {
             if (infoLogo) infoLogo.style.display = 'none';
         }
     };
+    
+    
+    
+    
+    
 
     
     const deletarProjeto = () => {
