@@ -49,6 +49,10 @@
     margin-top: 32px;
 }
 
+.resen_mensagem {
+    margin-top: 24px;
+}
+
 @media only screen and (max-width: 950px) {
 
     .resen_card {

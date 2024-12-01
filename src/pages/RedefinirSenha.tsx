@@ -64,7 +64,7 @@ export const RedefinirSenha = () => {
                 <input type="password" placeholder="Nova Senha" value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)} required />
                 <BotaoCTA img={IconeChave} escrito="Redefinir Senha" aparencia="primario" type="submit" />
             </form>
-            {mensagem && <p>{mensagem}</p>}
+            {mensagem && <p className="resen_mensagem">{mensagem}</p>}
         </div>
         </div>
     </>
