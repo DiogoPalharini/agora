@@ -54,30 +54,41 @@ const EditarProjeto = () => {
 
     // Carregar dados do projeto
     useEffect(() => {
-        const fetchProjeto = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/projeto/${id}`, {
-                    headers: { Authorization: `Bearer ${adm?.token}` },
-                });
-                const projeto = response.data;
-                projeto.dataInicio = formatarDataParaInput(projeto.dataInicio);
-                projeto.dataTermino = formatarDataParaInput(projeto.dataTermino);
-                setFormData(projeto);
-                setValorFormatado(formatarValor(projeto.valor));
-                if (adm?.id) {
-                    setFormData((prevData) => (prevData ? { ...prevData, adm: adm.id } : prevData));
-                }
-                console.log()
-            } catch (error) {
-                console.error('Erro ao carregar o projeto:', error);
-                Toast.fire({ icon: 'error', title: 'Erro ao carregar projeto.' });
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        if (adm && id) fetchProjeto();
-    }, [adm, id]);
+      const fetchProjeto = async () => {
+          try {
+              const response = await axios.get(`http://localhost:8080/projeto/${id}`, {
+                  headers: { Authorization: `Bearer ${adm?.token}` },
+              });
+              const projeto = response.data;
+  
+              // Formatando as datas para o formato do input de data
+              projeto.dataInicio = formatarDataParaInput(projeto.dataInicio);
+              projeto.dataTermino = formatarDataParaInput(projeto.dataTermino);
+  
+              // Incluindo o campo adm no formData para manter o ID do administrador
+              setFormData({
+                  ...projeto,
+                  adm: adm?.id,
+              });
+  
+              // Buscando arquivos associados ao projeto
+              const arquivosResponse = await axios.get(`http://localhost:8080/arquivos/projeto/${id}`, {
+                  headers: { Authorization: `Bearer ${adm?.token}` },
+              });
+              setArquivosExistentes(arquivosResponse.data); // Atualiza o estado com os arquivos do backend.
+  
+              setValorFormatado(formatarValor(projeto.valor));
+          } catch (error) {
+              console.error('Erro ao carregar o projeto ou arquivos:', error);
+              Toast.fire({ icon: 'error', title: 'Erro ao carregar dados do projeto.' });
+          } finally {
+              setIsLoading(false);
+          }
+      };
+  
+      if (adm && id) fetchProjeto();
+  }, [adm, id]);
+  
 
     // Formatar valor para exibição
     const formatarValor = (valor: number | string) => {
@@ -139,32 +150,36 @@ const EditarProjeto = () => {
         }
     };
 
-    const salvarProjeto = async (payload: any) => {
-        try {
-            const data = new FormData();
+    // Submissão do formulário
+const salvarProjeto = async (payload: any) => {
+  try {
+      const data = new FormData();
 
-            data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+      data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
 
-            Object.entries(arquivosNovos).forEach(([tipo, file]) => {
-                if (file) data.append(tipo, file);
-            });
+      // Adicionar arquivos novos
+      Object.entries(arquivosNovos).forEach(([tipo, file]) => {
+          if (file) data.append(tipo, file);
+      });
 
-            arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
+      // Enviar IDs de arquivos para desativação
+      arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
 
-            await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
-                headers: { Authorization: `Bearer ${adm?.token}` },
-            });
+      await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
+          headers: { Authorization: `Bearer ${adm?.token}` },
+      });
 
-            Toast.fire({
-                icon: 'success',
-                title: 'Projeto atualizado com sucesso!',
-            });
-            navigate("/");
-        } catch (error) {
-            console.error('Erro ao atualizar o projeto:', error);
-            Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
-        }
-    };
+      Toast.fire({
+          icon: 'success',
+          title: 'Projeto atualizado com sucesso!',
+      });
+      navigate("/");
+  } catch (error) {
+      console.error('Erro ao atualizar o projeto:', error);
+      Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
+  }
+};
+
 
     const enviarSolicitacaoEdicao = async (payload: any) => {
         try {

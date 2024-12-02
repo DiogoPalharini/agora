@@ -29,16 +29,20 @@ const PortalTransparencia = () => {
         const fetchProjetos = async () => {
             try {
                 const response = await axios.get('http://localhost:8080/projeto/listar');
-                setProjetos(response.data);
-                setProjetosFiltrados(response.data);
+                
+                // Filtrar projetos que não possuem situação "Desativado"
+                const projetosAtivos = response.data.filter((projeto: Projeto) => projeto.situacao !== "Desativado");
+    
+                setProjetos(projetosAtivos); // Define apenas projetos ativos no estado
+                setProjetosFiltrados(projetosAtivos); // Define a lista inicial com apenas projetos ativos
             } catch (error) {
                 console.error(error);
             }
         };
-
+    
         fetchProjetos();
-        
     }, []);
+    
 
     const formatarDataParaComparacao = (dataArray: number[]) => {
         if (Array.isArray(dataArray) && dataArray.length === 3) {
