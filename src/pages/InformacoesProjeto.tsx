@@ -365,7 +365,9 @@ const InformacoesProjeto = () => {
                     <div className="infopro_cima_dir">
                         { adm && (
                             <>
+                                {adm.tipo === 1 && ( // Apenas para administradores tipo 1
                                 <BotaoCTA img={IconeLixeira} escrito="Deletar" aparencia="secundario" cor="vermelho" onClick={deletarProjeto} />
+                                )}
                                 <BotaoCTA img={IconeEditar} escrito="Editar" aparencia="secundario" cor="cor_primario"  onClick={editarProjeto} />
                             </>
                         )}

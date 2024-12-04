@@ -127,9 +127,10 @@ const EditarProjeto = () => {
     };
 
     const handleExcluirArquivo = (arquivoId: number) => {
-        setArquivosParaExcluir((prev) => [...prev, arquivoId]);
-        setArquivosExistentes((prev) => prev.filter((arquivo) => arquivo.id !== arquivoId));
-    };
+      setArquivosParaExcluir((prev) => [...prev, arquivoId]); // Adiciona o ID à lista para exclusão
+      setArquivosExistentes((prev) => prev.filter((arquivo) => arquivo.id !== arquivoId)); // Remove da lista exibida
+  };
+  
 
     // Submissão do formulário
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -151,35 +152,35 @@ const EditarProjeto = () => {
     };
 
     // Submissão do formulário
-const salvarProjeto = async (payload: any) => {
-  try {
-      const data = new FormData();
-
-      data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-
-      // Adicionar arquivos novos
-      Object.entries(arquivosNovos).forEach(([tipo, file]) => {
-          if (file) data.append(tipo, file);
-      });
-
-      // Enviar IDs de arquivos para desativação
-      arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
-
-      await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
-          headers: { Authorization: `Bearer ${adm?.token}` },
-      });
-
-      Toast.fire({
-          icon: 'success',
-          title: 'Projeto atualizado com sucesso!',
-      });
-      navigate("/");
-  } catch (error) {
-      console.error('Erro ao atualizar o projeto:', error);
-      Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
-  }
-};
-
+    const salvarProjeto = async (payload: any) => {
+      try {
+          const data = new FormData();
+    
+          data.append('projeto', new Blob([JSON.stringify(payload)], { type: 'application/json' }));
+    
+          // Adicionar arquivos novos
+          Object.entries(arquivosNovos).forEach(([tipo, file]) => {
+              if (file) data.append(tipo, file);
+          });
+    
+          // Enviar IDs de arquivos para desativação
+          arquivosParaExcluir.forEach((id) => data.append('arquivosExcluidos', id.toString()));
+    
+          await axios.put(`http://localhost:8080/projeto/editar/${id}`, data, {
+              headers: { Authorization: `Bearer ${adm?.token}` },
+          });
+    
+          Toast.fire({
+              icon: 'success',
+              title: 'Projeto atualizado com sucesso!',
+          });
+          navigate("/");
+      } catch (error) {
+          console.error('Erro ao atualizar o projeto:', error);
+          Toast.fire({ icon: 'error', title: 'Erro ao atualizar o projeto.' });
+      }
+    };
+    
 
     const enviarSolicitacaoEdicao = async (payload: any) => {
         try {
